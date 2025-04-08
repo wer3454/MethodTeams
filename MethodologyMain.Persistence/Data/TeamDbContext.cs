@@ -1,5 +1,4 @@
 ﻿using MethodologyMain.Logic.Entities;
-using MethodTeams.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace MethodTeams.Data

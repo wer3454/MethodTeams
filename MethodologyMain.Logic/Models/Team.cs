@@ -1,7 +1,4 @@
 ﻿using MethodologyMain.Logic.Entities;
-using MethodologyMain.Logic.Models;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 
 namespace MethodTeams.Models
 {
