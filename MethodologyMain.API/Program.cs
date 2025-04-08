@@ -2,6 +2,7 @@ using MethodTeams.Data;
 using MethodTeams.Services;
 using MethodTeams.Interface;
 using System.Text.Json.Serialization;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,7 +16,7 @@ builder.Services.AddControllers()
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddScoped<ITeamService,TeamService>();
-builder.Services.AddDbContext<TeamDbContext>();
+builder.Services.AddDbContext<MyDbContext>();
 
 var app = builder.Build();
 
