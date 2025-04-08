@@ -20,4 +20,11 @@
     <PackageReference Include="Swashbuckle.AspNetCore" Version="8.1.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\MethodologyMain.Application\MethodologyMain.Application.csproj" />
+    <ProjectReference Include="..\MethodologyMain.Infrastructure\MethodologyMain.Infrastructure.csproj" />
+    <ProjectReference Include="..\MethodologyMain.Logic\MethodologyMain.Logic.csproj" />
+    <ProjectReference Include="..\MethodologyMain.Persistence\MethodologyMain.Persistence.csproj" />
+  </ItemGroup>
+
 </Project>
