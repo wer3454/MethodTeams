@@ -1,11 +1,11 @@
-﻿using MethodTeams.DTO;
+﻿using MethodologyMain.Application.DTO;
 using MethodTeams.Models;
-using MethodTeams.Interface;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
+using MethodologyMain.Application.Interface;
 
-namespace MethodTeams.Controllers
+namespace MethodologyMain.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
@@ -25,7 +25,7 @@ namespace MethodTeams.Controllers
         {
             try
             {
-                int currentUserId = GetCurrentUserId(); // Получение ID текущего пользователя из токена
+                Guid currentUserId = GetCurrentUserId(); // Получение ID текущего пользователя из токена
                 var team = await _teamService.CreateTeamAsync(dto.Name, dto.Description, currentUserId, dto.EventId);
                 return CreatedAtAction(nameof(GetTeam), new { id = team.Id }, team);
             }
@@ -37,7 +37,7 @@ namespace MethodTeams.Controllers
 
         // Получение информации о команде
         [HttpGet("{id}")]
-        public async Task<ActionResult<Team>> GetTeam(int id)
+        public async Task<ActionResult<Team>> GetTeam(Guid id)
         {
             try
             {
@@ -53,11 +53,11 @@ namespace MethodTeams.Controllers
         // Удаление команды
         [HttpDelete("{id}")]
         //[Authorize]
-        public async Task<ActionResult> DeleteTeam(int id)
+        public async Task<ActionResult> DeleteTeam(Guid id)
         {
             try
             {
-                int currentUserId = GetCurrentUserId();
+                Guid currentUserId = GetCurrentUserId();
                 bool isAdmin = User.IsInRole("Admin"); // Проверка роли администратора
 
                 await _teamService.DeleteTeamAsync(id, currentUserId, isAdmin);
@@ -76,11 +76,11 @@ namespace MethodTeams.Controllers
         // Добавление пользователя в команду
         [HttpPost("{id}/members")]
         //[Authorize]
-        public async Task<ActionResult> AddMember(int id, [FromBody] AddUserDto dto)
+        public async Task<ActionResult> AddMember(Guid id, [FromBody] AddUserDto dto)
         {
             try
             {
-                int currentUserId = GetCurrentUserId();
+                Guid currentUserId = GetCurrentUserId();
                 await _teamService.AddUserToTeamAsync(id, dto.UserId, currentUserId);
                 return NoContent();
             }
@@ -101,11 +101,11 @@ namespace MethodTeams.Controllers
         // Удаление пользователя из команды
         [HttpDelete("{id}/members/{userId}")]
         //[Authorize]
-        public async Task<ActionResult> RemoveMember(int id, int userId)
+        public async Task<ActionResult> RemoveMember(Guid id, Guid userId)
         {
             try
             {
-                int currentUserId = GetCurrentUserId();
+                Guid currentUserId = GetCurrentUserId();
                 await _teamService.RemoveUserFromTeamAsync(id, userId, currentUserId);
                 return NoContent();
             }
@@ -125,7 +125,7 @@ namespace MethodTeams.Controllers
 
         // Получение списка участников команды
         [HttpGet("{id}/members")]
-        public async Task<ActionResult<List<int>>> GetTeamMembers(int id)
+        public async Task<ActionResult<List<int>>> GetTeamMembers(Guid id)
         {
             try
             {
@@ -141,11 +141,11 @@ namespace MethodTeams.Controllers
         // Передача прав капитана
         [HttpPut("{id}/captain")]
         //[Authorize]
-        public async Task<ActionResult> TransferCaptainRights(int id, [FromBody] AddUserDto dto)
+        public async Task<ActionResult> TransferCaptainRights(Guid id, [FromBody] AddUserDto dto)
         {
             try
             {
-                int currentUserId = GetCurrentUserId();
+                Guid currentUserId = GetCurrentUserId();
                 await _teamService.TransferCaptainRightsAsync(id, dto.UserId, currentUserId);
                 return NoContent();
             }
@@ -165,7 +165,7 @@ namespace MethodTeams.Controllers
 
         // Получение списка команд для события
         [HttpGet("event/{eventId}")]
-        public async Task<ActionResult<List<Team>>> GetTeamsByEvent(int eventId)
+        public async Task<ActionResult<List<Team>>> GetTeamsByEvent(Guid eventId)
         {
             var teams = await _teamService.GetTeamsByEventIdAsync(eventId);
             return Ok(teams);
@@ -174,11 +174,11 @@ namespace MethodTeams.Controllers
         // Получение команды пользователя для конкретного события
         [HttpGet("event/{eventId}/user")]
         //[Authorize]
-        public async Task<ActionResult<Team>> GetUserTeamForEvent(int eventId)
+        public async Task<ActionResult<Team>> GetUserTeamForEvent(Guid eventId)
         {
             try
             {
-                int currentUserId = GetCurrentUserId();
+                Guid currentUserId = GetCurrentUserId();
                 var team = await _teamService.GetUserTeamForEventAsync(currentUserId, eventId);
 
                 if (team == null)
@@ -201,9 +201,9 @@ namespace MethodTeams.Controllers
         //    var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier);
         //    return int.Parse(userIdClaim.Value);
         //}
-        private int GetCurrentUserId()
+        private Guid GetCurrentUserId()
         {
-            return 1;
+            return Guid.Parse("1");
         }
     }
 }

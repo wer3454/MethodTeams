@@ -1,18 +1,18 @@
 ﻿using MethodTeams.Models;
 
-namespace MethodTeams.Interface
+namespace MethodologyMain.Application.Interface
 {
     public interface ITeamService
     {
-        Task AddUserToTeamAsync(int teamId, int userId, int requestingUserId);
-        Task<Team> CreateTeamAsync(string name, string description, int captainId, int eventId);
-        Task DeleteTeamAsync(int teamId, int requestingUserId, bool isAdmin = false);
-        Task<Team> GetTeamByIdAsync(int teamId);
-        Task<List<int>> GetTeamMembersAsync(int teamId);
-        Task<List<Team>> GetTeamsByEventIdAsync(int eventId);
-        Task<Team> GetUserTeamForEventAsync(int userId, int eventId);
-        Task<bool> IsUserTeamCaptainAsync(int teamId, int userId);
-        Task RemoveUserFromTeamAsync(int teamId, int userId, int requestingUserId);
-        Task TransferCaptainRightsAsync(int teamId, int newCaptainId, int currentCaptainId);
+        Task AddUserToTeamAsync(Guid teamId, Guid userId, Guid requestingUserId);
+        Task<Team> CreateTeamAsync(string name, string description, Guid captainId, Guid eventId);
+        Task DeleteTeamAsync(Guid teamId, Guid requestingUserId, bool isAdmin = false);
+        Task<Team> GetTeamByIdAsync(Guid teamId);
+        Task<List<Guid>> GetTeamMembersAsync(Guid teamId);
+        Task<List<Team>> GetTeamsByEventIdAsync(Guid eventId);
+        Task<Team> GetUserTeamForEventAsync(Guid userId, Guid eventId);
+        Task<bool> IsUserTeamCaptainAsync(Guid teamId, Guid userId);
+        Task RemoveUserFromTeamAsync(Guid teamId, Guid userId, Guid requestingUserId);
+        Task TransferCaptainRightsAsync(Guid teamId, Guid newCaptainId, Guid currentCaptainId);
     }
 }
