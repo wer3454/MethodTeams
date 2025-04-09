@@ -1,8 +1,7 @@
 using MethodTeams.Data;
 using MethodTeams.Services;
-using MethodTeams.Interface;
 using System.Text.Json.Serialization;
-using Microsoft.EntityFrameworkCore;
+using MethodologyMain.Application.Interface;
 
 var builder = WebApplication.CreateBuilder(args);
 
