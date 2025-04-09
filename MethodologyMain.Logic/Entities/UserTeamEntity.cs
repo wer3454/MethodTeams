@@ -18,6 +18,9 @@ namespace MethodologyMain.Logic.Entities
         [Column("teamId")]
         public Guid TeamId { get; set; }
 
+        [Column("joinedAt")]
+        public DateTime JoinedAt {get; set; }
+
         public UserMainEntity User { get; set; } = null!;
 
         public TeamEntity Team { get; set; } = null!;
