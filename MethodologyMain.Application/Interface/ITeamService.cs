@@ -1,17 +1,17 @@
-﻿using MethodTeams.Models;
+﻿using MethodologyMain.Logic.Entities;
 
 namespace MethodologyMain.Application.Interface
 {
     public interface ITeamService
     {
         Task AddUserToTeamAsync(Guid teamId, Guid userId, Guid requestingUserId);
-        Task<Team> CreateTeamAsync(string name, string description, Guid captainId, Guid eventId);
+        Task<TeamEntity> CreateTeamAsync(string name, string description, Guid captainId, Guid eventId);
         Task DeleteTeamAsync(Guid teamId, Guid requestingUserId, bool isAdmin = false);
-        Task<Team> GetTeamByIdAsync(Guid teamId);
+        Task<TeamEntity> GetTeamByIdAsync(Guid teamId);
         Task<List<Guid>> GetTeamMembersAsync(Guid teamId);
-        Task<List<Team>> GetTeamsByEventIdAsync(Guid eventId);
-        Task<Team> GetUserTeamForEventAsync(Guid userId, Guid eventId);
-        Task<bool> IsUserTeamCaptainAsync(Guid teamId, Guid userId);
+        //Task<List<TeamEntity>> GetTeamsByEventIdAsync(Guid eventId);
+        //Task<TeamEntity> GetUserTeamForEventAsync(Guid userId, Guid eventId);
+        //Task<bool> IsUserTeamCaptainAsync(Guid teamId, Guid userId);
         Task RemoveUserFromTeamAsync(Guid teamId, Guid userId, Guid requestingUserId);
         Task TransferCaptainRightsAsync(Guid teamId, Guid newCaptainId, Guid currentCaptainId);
     }
