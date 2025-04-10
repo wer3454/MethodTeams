@@ -3,6 +3,7 @@ using AutoMapper;
 using MethodologyMain.Persistence.Interfaces;
 using MethodologyMain.Application.Interface;
 using MethodologyMain.Logic.Entities;
+using MethodologyMain.Application.Exceptions;
 
 namespace MethodTeams.Services
 {
@@ -20,7 +21,7 @@ namespace MethodTeams.Services
             // Проверка, что у пользователя нет другой команды для этого 
             if (await teamRepo.CheckUserTeamInHackAsync(captainId, HackathonId))
             {
-                throw new InvalidOperationException("Пользователь уже состоит в команде для данного события");
+                throw new MemberAlreadyInTeamException();
             }
             // Создание команды
             var team = new TeamEntity
@@ -49,7 +50,7 @@ namespace MethodTeams.Services
         {
             if (!await teamRepo.CheckTeamExistAsync(teamId))
             {
-                throw new KeyNotFoundException("Команда не найдена");
+                throw new TeamNotFoundException();
             }
 
             if (await teamRepo.GetCaptainIdAsync(teamId) != requestingUserId && !isAdmin)
@@ -65,7 +66,7 @@ namespace MethodTeams.Services
         {
             if (!await teamRepo.CheckTeamExistAsync(teamId))
             {
-                throw new KeyNotFoundException("Команда не найдена");
+                throw new TeamNotFoundException();
             }
 
             Guid hackathonId = await teamRepo.GetHackathonIdAsync(teamId);
@@ -78,13 +79,13 @@ namespace MethodTeams.Services
             // Проверка, что пользователь не состоит в команде этого события
             if (await teamRepo.CheckUserTeamInHackAsync(userId, hackathonId))
             {
-                throw new InvalidOperationException("Пользователь уже состоит в команде для данного события");
+                throw new MemberAlreadyInTeamException();
             }
 
             // Проверка, что пользователь не является уже членом этой команды
             if (await teamRepo.CheckUserInTeamAsync(userId, teamId))
             {
-                throw new InvalidOperationException("Пользователь уже состоит в этой команде");
+                throw new MemberAlreadyInTeamException();
             }
 
             // Добавление пользователя в команду
@@ -96,7 +97,7 @@ namespace MethodTeams.Services
         {
             if (!await teamRepo.CheckTeamExistAsync(teamId))
             {
-                throw new KeyNotFoundException("Команда не найдена");
+                throw new TeamNotFoundException();
             }
 
             // Проверка прав: капитан может удалить любого, участник - только себя
@@ -116,7 +117,7 @@ namespace MethodTeams.Services
 
             if (!await teamRepo.CheckUserInTeamAsync(userId, teamId))
             {
-                throw new KeyNotFoundException("Пользователь не найден в команде");
+                throw new UserNotFoundException();
             }
 
             await teamRepo.RemoveMemberAsync(userId, teamId);
@@ -127,7 +128,7 @@ namespace MethodTeams.Services
         {
             if (!await teamRepo.CheckTeamExistAsync(teamId))
             {
-                throw new KeyNotFoundException("Команда не найдена");
+                throw new TeamNotFoundException();
             }
 
             if (await teamRepo.GetCaptainIdAsync(teamId) != currentCaptainId)
@@ -150,7 +151,7 @@ namespace MethodTeams.Services
         {
             if (!await teamRepo.CheckTeamExistAsync(teamId))
             {
-                throw new KeyNotFoundException("Команда не найдена");
+                throw new TeamNotFoundException();
             }
 
             return await teamRepo.GetByIdAsync(teamId);
@@ -161,7 +162,7 @@ namespace MethodTeams.Services
         {
             if (!await teamRepo.CheckTeamExistAsync(teamId))
             {
-                throw new KeyNotFoundException("Команда не найдена");
+                throw new TeamNotFoundException();
             }
 
             return await teamRepo.GetTeamMembersAsync(teamId);
