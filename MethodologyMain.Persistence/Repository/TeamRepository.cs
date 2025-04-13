@@ -1,9 +1,7 @@
 ﻿using MethodologyMain.Logic.Entities;
 using MethodologyMain.Persistence.Interfaces;
 using MethodTeams.Data;
-using MethodTeams.Models;
 using Microsoft.EntityFrameworkCore;
-
 
 namespace MethodologyMain.Persistence.Repository
 {
@@ -12,86 +10,90 @@ namespace MethodologyMain.Persistence.Repository
         public TeamRepository(MyDbContext context) : base(context)
         {
         }
-        public async Task<bool> CheckUserTeamInHackAsync(Guid userId, Guid hackathonId)
+        private static void CheckCancellation(CancellationToken token)
         {
-            // User cannot be null
-            var user = await _context.Users.
-                AsNoTracking().
-                FirstAsync(e => e.Id == userId);
-            return user.Teams.Find(m => m.Team.HackathonId == hackathonId) 
-                != null;
+            token.ThrowIfCancellationRequested();
         }
-        public async Task<bool> CheckUserInTeamAsync(Guid userId, Guid teamId)
+        private async Task<TeamEntity> GetTeamNoTrackingAsync(Guid teamId, CancellationToken token)
         {
-            // Team cannot be null checked before
-            var team = await _context.Teams.
-                AsNoTracking().
-                FirstAsync(e => e.Id == teamId);
-            return team.Members.Find(m => m.UserId == userId) 
-                != null;
+            CheckCancellation(token);
+            return await _context.Teams
+                .AsNoTracking()
+                .FirstAsync(e => e.Id == teamId, token);
         }
-        public async Task<bool> CheckTeamExistAsync(Guid teamId)
+        private async Task<TeamEntity> GetTeamAsync(Guid teamId, CancellationToken token)
         {
-            // Team cannot be null checked before
-            var team = await _context.Teams.
-                AsNoTracking().
-                FirstAsync(e => e.Id == teamId);
+            CheckCancellation(token);
+            return await _context.Teams.FindAsync([teamId], token);
+        }
+        private async Task SaveChangesAsync(CancellationToken token)
+        {
+            CheckCancellation(token);
+            await _context.SaveChangesAsync(token);
+        }
+        public async Task<bool> CheckUserTeamInHackAsync(Guid userId, Guid hackathonId, CancellationToken token)
+        {
+            CheckCancellation(token);
+            var user = await _context.Users
+                .AsNoTracking()
+                .FirstAsync(e => e.Id == userId, token);
+            return user.Teams.Find(m => m.Team.HackathonId == hackathonId) != null;
+        }
+        public async Task<bool> CheckUserInTeamAsync(Guid userId, Guid teamId, CancellationToken token)
+        {
+            var team = await GetTeamNoTrackingAsync(teamId, token);
+            return team.Members.Find(m => m.UserId == userId) != null;
+        }
+        public async Task<bool> CheckTeamExistAsync(Guid teamId, CancellationToken token)
+        {
+            var team = await GetTeamNoTrackingAsync(teamId, token);
             return team != null;
         }
-        public async Task AddMemberAsync(Guid userId, Guid teamId)
+        public async Task AddMemberAsync(Guid userId, Guid teamId, CancellationToken token)
         {
-            // Team cannot be null checked before
-            var team = await _context.Teams.FindAsync(teamId);
+            var team = await GetTeamAsync(teamId, token);
             team.Members.Add(new UserTeamEntity
             {
                 TeamId = teamId,
                 UserId = userId,
                 JoinedAt = DateTime.UtcNow
             });
-            await _context.SaveChangesAsync();
+            await SaveChangesAsync(token);
         }
-        public async Task RemoveTeamAsync(Guid teamId)
+        public async Task RemoveTeamAsync(Guid teamId, CancellationToken token)
         {
-            // Удаление связанных участников (maybe not required)
-            var team = await _context.Teams.FindAsync(teamId);
+            var team = await GetTeamAsync(teamId, token);
             if (team.Members is not null) { var _ = team.Members.RemoveAll; }
-            // Удаление команды
             _context.Teams.Remove(team);
-            await _context.SaveChangesAsync();
+            await SaveChangesAsync(token);
         }
-
-        public async Task RemoveMemberAsync(Guid userId, Guid teamId)
+        public async Task RemoveMemberAsync(Guid userId, Guid teamId, CancellationToken token)
         {
-            var team = await _context.Teams.FindAsync(teamId);
+            var team = await GetTeamAsync(teamId, token);
             var member = team.Members.Find(e => e.UserId == userId);
             team.Members.Remove(member);
-            await _context.SaveChangesAsync();
+            await SaveChangesAsync(token);
         }
-
-        public async Task TransferCaptainAsync(Guid newCaptainId, Guid teamId)
+        public async Task TransferCaptainAsync(Guid newCaptainId, Guid teamId, CancellationToken token)
         {
-            var team = await _context.Teams.FindAsync(teamId);
+            var team = await GetTeamAsync(teamId, token);
             var member = team.Members.Find(e => e.UserId == newCaptainId);
             team.CaptainId = newCaptainId;
-            await _context.SaveChangesAsync();
+            await SaveChangesAsync(token);
         }
-        public async Task<Guid> GetCaptainIdAsync(Guid teamId)
+        public async Task<Guid?> GetCaptainIdAsync(Guid teamId, CancellationToken token)
         {
-            var team = await _context.Teams.
-                AsNoTracking().
-                FirstAsync(e => e.Id == teamId);
+            var team = await GetTeamNoTrackingAsync(teamId, token);
             return team.CaptainId;
         }
-        public async Task<Guid> GetHackathonIdAsync(Guid teamId)
+        public async Task<Guid?> GetHackathonIdAsync(Guid teamId, CancellationToken token)
         {
-            var team = await _context.Teams.
-                AsNoTracking().
-                FirstAsync(e => e.Id == teamId);
+            var team = await GetTeamNoTrackingAsync(teamId, token);
             return team.HackathonId;
         }
-        public async Task<List<Guid>> GetTeamMembersAsync(Guid teamId)
+        public async Task<List<Guid>?> GetTeamMembersAsync(Guid teamId, CancellationToken token)
         {
-            var team = await _context.Teams.FindAsync(teamId);
+            var team = await GetTeamAsync(teamId, token);
             return team.Members.Select(m => m.UserId).ToList();
         }
     }
