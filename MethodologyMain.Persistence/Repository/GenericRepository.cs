@@ -13,43 +13,43 @@ namespace MethodologyMain.Persistence.Repository
             _context = context;
         }
 
-        public async Task AddAsync(T entity)
+        public async Task AddAsync(T entity, CancellationToken token)
         {
-            await _context.Set<T>().AddAsync(entity);
-            await _context.SaveChangesAsync();
+            _context.Set<T>().Add(entity);
+            await _context.SaveChangesAsync(token);
         }
 
-        public async Task AddRangeAsync(IEnumerable<T> entities)
+        public async Task AddRangeAsync(IEnumerable<T> entities, CancellationToken token)
         {
-            await _context.Set<T>().AddRangeAsync(entities);
-            await _context.SaveChangesAsync();
+            _context.Set<T>().AddRange(entities);
+            await _context.SaveChangesAsync(token);
         }
 
-        public async Task<IEnumerable<T>> FindAsync(Expression<Func<T, bool>> expression)
+        public async Task<IEnumerable<T>> FindAsync(Expression<Func<T, bool>> expression, CancellationToken token)
         {
-            return await _context.Set<T>().Where(expression).ToListAsync();
+            return await _context.Set<T>().Where(expression).ToListAsync(token);
         }
 
-        public async Task<IEnumerable<T>> GetAllAsync()
+        public async Task<IEnumerable<T>> GetAllAsync(CancellationToken token)
         {
-            return await _context.Set<T>().ToListAsync();
+            return await _context.Set<T>().ToListAsync(token);
         }
 
-        public async Task<T?> GetByIdAsync(Guid id)
+        public async Task<T?> GetByIdAsync(Guid id, CancellationToken token)
         {
-            return await _context.Set<T>().FindAsync(id);
+            return await _context.Set<T>().FindAsync([id], token);
         }
 
-        public async Task RemoveAsync(T entity)
+        public async Task RemoveAsync(T entity, CancellationToken token)
         {
             _context.Set<T>().Remove(entity);
-            await _context.SaveChangesAsync();
+            await _context.SaveChangesAsync(token);
         }
 
-        public async Task RemoveRangeAsync(IEnumerable<T> entities)
+        public async Task RemoveRangeAsync(IEnumerable<T> entities, CancellationToken token)
         {
             _context.Set<T>().RemoveRange(entities);
-            await _context.SaveChangesAsync();
+            await _context.SaveChangesAsync(token);
         }
     }
 }
