@@ -1,28 +1,33 @@
-﻿using Microsoft.EntityFrameworkCore;
-using AutoMapper;
-using MethodologyMain.Persistence.Interfaces;
+﻿using MethodologyMain.Persistence.Interfaces;
 using MethodologyMain.Application.Interface;
 using MethodologyMain.Logic.Entities;
 using MethodologyMain.Application.Exceptions;
 
 namespace MethodTeams.Services
 {
-    public class TeamService : ITeamService
+    public class TeamService: ITeamService
     {
         private readonly ITeamRepository teamRepo;
-        public TeamService(ITeamRepository teamRepo)
+        private readonly ITeamValidationService validation;
+        public TeamService(
+            ITeamRepository teamRepo,
+            ITeamValidationService validation)
         {
             this.teamRepo = teamRepo;
+            this.validation = validation;
         }
 
         // Создание новой команды
-        public async Task<TeamEntity> CreateTeamAsync(string name, string description, Guid captainId, Guid HackathonId)
+        public async Task<TeamEntity> CreateTeamAsync(
+            string name, 
+            string description, 
+            Guid captainId, 
+            Guid HackathonId,
+            CancellationToken token
+            )
         {
             // Проверка, что у пользователя нет другой команды для этого 
-            if (await teamRepo.CheckUserTeamInHackAsync(captainId, HackathonId))
-            {
-                throw new MemberAlreadyInTeamException();
-            }
+            await validation.CheckUserNotInAnyTeamForHackathonAsync(captainId, HackathonId, token);
             // Создание команды
             var team = new TeamEntity
             {
@@ -41,133 +46,81 @@ namespace MethodTeams.Services
                 JoinedAt = DateTime.UtcNow
             };
             team.Members.Add(member);
-            await teamRepo.AddAsync(team);
+            await teamRepo.AddAsync(team, token);
             return team;
         }
 
         // Удаление команды (только капитаном или администратором)
-        public async Task DeleteTeamAsync(Guid teamId, Guid requestingUserId, bool isAdmin = false)
+        public async Task DeleteTeamAsync(
+            Guid teamId, 
+            Guid requestingUserId,
+            CancellationToken token,
+            bool isAdmin = false
+            )
         {
-            if (!await teamRepo.CheckTeamExistAsync(teamId))
-            {
-                throw new TeamNotFoundException();
-            }
-
-            if (await teamRepo.GetCaptainIdAsync(teamId) != requestingUserId && !isAdmin)
-            {
-                throw new UnauthorizedAccessException("Только капитан команды или администратор может удалить команду");
-            }
-
-            await teamRepo.RemoveTeamAsync(teamId);
+            await validation.CheckTeamExistsAsync(teamId, token);
+            await validation.CheckUserIsCaptainOrAdminAsync(teamId, requestingUserId, isAdmin, token);
+            await teamRepo.RemoveTeamAsync(teamId, token);
         }
 
         // Добавление пользователя в команду
-        public async Task AddUserToTeamAsync(Guid teamId, Guid userId, Guid requestingUserId)
+        public async Task AddUserToTeamAsync(
+            Guid teamId, 
+            Guid userId, 
+            Guid requestingUserId,
+            CancellationToken token
+            )
         {
-            if (!await teamRepo.CheckTeamExistAsync(teamId))
-            {
-                throw new TeamNotFoundException();
-            }
-
-            Guid hackathonId = await teamRepo.GetHackathonIdAsync(teamId);
-
-            if (await teamRepo.GetCaptainIdAsync(teamId) != requestingUserId)
-            {
-                throw new UnauthorizedAccessException("Только капитан команды может добавлять участников");
-            }
-
-            // Проверка, что пользователь не состоит в команде этого события
-            if (await teamRepo.CheckUserTeamInHackAsync(userId, hackathonId))
-            {
-                throw new MemberAlreadyInTeamException();
-            }
-
-            // Проверка, что пользователь не является уже членом этой команды
-            if (await teamRepo.CheckUserInTeamAsync(userId, teamId))
-            {
-                throw new MemberAlreadyInTeamException();
-            }
-
-            // Добавление пользователя в команду
-            await teamRepo.AddMemberAsync(userId, teamId);
+            await validation.CheckTeamExistsAsync(teamId, token);
+            Guid hackathonId = (Guid)await teamRepo.GetHackathonIdAsync(teamId, token);
+            await validation.CheckUserIsCaptainAsync(teamId, requestingUserId, token);
+            await validation.CheckUserNotInTeamAsync(userId, teamId, token);
+            await validation.CheckUserNotInAnyTeamForHackathonAsync(userId, hackathonId, token);
+            await teamRepo.AddMemberAsync(userId, teamId, token);
         }
 
         // Удаление пользователя из команды
-        public async Task RemoveUserFromTeamAsync(Guid teamId, Guid userId, Guid requestingUserId)
+        public async Task RemoveUserFromTeamAsync(
+            Guid teamId, 
+            Guid userId, 
+            Guid requestingUserId,
+            CancellationToken token
+            )
         {
-            if (!await teamRepo.CheckTeamExistAsync(teamId))
-            {
-                throw new TeamNotFoundException();
-            }
-
+            await validation.CheckTeamExistsAsync(teamId, token);
             // Проверка прав: капитан может удалить любого, участник - только себя
-            Guid captainId = await teamRepo.GetCaptainIdAsync(teamId);
-            bool canRemove = (captainId == requestingUserId) || (userId == requestingUserId);
-
-            if (!canRemove)
-            {
-                throw new UnauthorizedAccessException("Недостаточно прав для удаления участника");
-            }
-
+            await validation.CheckUserIsCaptainOrRequestedAsync(teamId, userId, requestingUserId, token);
             // Нельзя удалить капитана
-            if (userId == captainId)
-            {
-                throw new InvalidOperationException("Капитан не может быть удален из команды. Сначала передайте права капитана другому участнику.");
-            }
-
-            if (!await teamRepo.CheckUserInTeamAsync(userId, teamId))
-            {
-                throw new UserNotFoundException();
-            }
-
-            await teamRepo.RemoveMemberAsync(userId, teamId);
+            await validation.CheckCaptainKick(teamId, userId, token);
+            await validation.CheckUserInTeamAsync(userId, teamId, token);
+            await teamRepo.RemoveMemberAsync(userId, teamId, token);
         }
-
         // Передача прав капитана
-        public async Task TransferCaptainRightsAsync(Guid teamId, Guid newCaptainId, Guid currentCaptainId)
+        public async Task TransferCaptainRightsAsync(
+            Guid teamId, 
+            Guid newCaptainId, 
+            Guid currentCaptainId,
+            CancellationToken token
+            )
         {
-            if (!await teamRepo.CheckTeamExistAsync(teamId))
-            {
-                throw new TeamNotFoundException();
-            }
-
-            if (await teamRepo.GetCaptainIdAsync(teamId) != currentCaptainId)
-            {
-                throw new UnauthorizedAccessException("Только текущий капитан может передать права капитана");
-            }
-
-            // Проверка, что новый капитан является участником команды
-            if (!await teamRepo.CheckUserInTeamAsync(newCaptainId, teamId))
-            {
-                throw new InvalidOperationException("Новый капитан должен быть участником команды");
-            }
-
-            // Передача прав
-            await teamRepo.TransferCaptainAsync(newCaptainId, teamId);
+            await validation.CheckTeamExistsAsync(teamId, token);
+            await validation.CheckUserIsCaptainAsync(teamId, currentCaptainId, token);
+            await validation.CheckUserInTeamAsync(newCaptainId, teamId, token);
+            await teamRepo.TransferCaptainAsync(newCaptainId, teamId, token);
         }
-
         // Получение информации о команде по ID
-        public async Task<TeamEntity> GetTeamByIdAsync(Guid teamId)
+        public async Task<TeamEntity> GetTeamByIdAsync(Guid teamId, CancellationToken token)
         {
-            if (!await teamRepo.CheckTeamExistAsync(teamId))
-            {
-                throw new TeamNotFoundException();
-            }
-
-            return await teamRepo.GetByIdAsync(teamId);
+            await validation.CheckTeamExistsAsync(teamId, token);
+            return await teamRepo.GetByIdAsync(teamId, token);
         }
-
         // Получение списка участников команды
-        public async Task<List<Guid>> GetTeamMembersAsync(Guid teamId)
+        public async Task<List<Guid>> GetTeamMembersAsync(Guid teamId, CancellationToken token)
         {
-            if (!await teamRepo.CheckTeamExistAsync(teamId))
-            {
-                throw new TeamNotFoundException();
-            }
-
-            return await teamRepo.GetTeamMembersAsync(teamId);
+            await validation.CheckTeamExistsAsync(teamId, token);
+            return await teamRepo.GetTeamMembersAsync(teamId, token);
         }
-
+        
         //// Проверка, является ли пользователь капитаном команды
         //public async Task<bool> IsUserTeamCaptainAsync(Guid teamId, Guid userId)
         //{
