@@ -2,6 +2,10 @@
 using MethodologyMain.Application.Interface;
 using MethodologyMain.Logic.Entities;
 using MethodologyMain.Application.Exceptions;
+using MethodTeams.Models;
+using AutoMapper;
+using MethodologyMain.Logic.Models;
+using MethodTeams.DTO;
 
 namespace MethodTeams.Services
 {
@@ -9,12 +13,15 @@ namespace MethodTeams.Services
     {
         private readonly ITeamRepository teamRepo;
         private readonly ITeamValidationService validation;
+        private readonly IMapper mapper;
         public TeamService(
             ITeamRepository teamRepo,
-            ITeamValidationService validation)
+            ITeamValidationService validation,
+            IMapper mapper)
         {
             this.teamRepo = teamRepo;
             this.validation = validation;
+            this.mapper = mapper;
         }
 
         // Создание новой команды
@@ -120,7 +127,15 @@ namespace MethodTeams.Services
             await validation.CheckTeamExistsAsync(teamId, token);
             return await teamRepo.GetTeamMembersAsync(teamId, token);
         }
-        
+
+        // Получение списка команд
+        public async Task<List<TeamInfoDto>> GetTeamAllAsync(CancellationToken token)
+        {
+            
+            var teams = await teamRepo.GetAllAsync(token);
+            return mapper.Map<List<TeamInfoDto>>(teams);
+        }
+
         //// Проверка, является ли пользователь капитаном команды
         //public async Task<bool> IsUserTeamCaptainAsync(Guid teamId, Guid userId)
         //{

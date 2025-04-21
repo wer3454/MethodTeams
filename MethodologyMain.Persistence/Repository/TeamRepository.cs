@@ -10,27 +10,6 @@ namespace MethodologyMain.Persistence.Repository
         public TeamRepository(MyDbContext context) : base(context)
         {
         }
-        private static void CheckCancellation(CancellationToken token)
-        {
-            token.ThrowIfCancellationRequested();
-        }
-        private async Task<TeamEntity> GetTeamNoTrackingAsync(Guid teamId, CancellationToken token)
-        {
-            CheckCancellation(token);
-            return await _context.Teams
-                .AsNoTracking()
-                .FirstAsync(e => e.Id == teamId, token);
-        }
-        private async Task<TeamEntity> GetTeamAsync(Guid teamId, CancellationToken token)
-        {
-            CheckCancellation(token);
-            return await _context.Teams.FindAsync([teamId], token);
-        }
-        private async Task SaveChangesAsync(CancellationToken token)
-        {
-            CheckCancellation(token);
-            await _context.SaveChangesAsync(token);
-        }
         public async Task<bool> CheckUserTeamInHackAsync(Guid userId, Guid hackathonId, CancellationToken token)
         {
             CheckCancellation(token);
@@ -95,6 +74,27 @@ namespace MethodologyMain.Persistence.Repository
         {
             var team = await GetTeamAsync(teamId, token);
             return team.Members.Select(m => m.UserId).ToList();
+        }
+        private static void CheckCancellation(CancellationToken token)
+        {
+            token.ThrowIfCancellationRequested();
+        }
+        private async Task<TeamEntity> GetTeamNoTrackingAsync(Guid teamId, CancellationToken token)
+        {
+            CheckCancellation(token);
+            return await _context.Teams
+                .AsNoTracking()
+                .FirstAsync(e => e.Id == teamId, token);
+        }
+        private async Task<TeamEntity> GetTeamAsync(Guid teamId, CancellationToken token)
+        {
+            CheckCancellation(token);
+            return await _context.Teams.FindAsync([teamId], token);
+        }
+        private async Task SaveChangesAsync(CancellationToken token)
+        {
+            CheckCancellation(token);
+            await _context.SaveChangesAsync(token);
         }
     }
 }

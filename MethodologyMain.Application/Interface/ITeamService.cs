@@ -1,4 +1,5 @@
 ﻿using MethodologyMain.Logic.Entities;
+using MethodTeams.DTO;
 
 namespace MethodologyMain.Application.Interface
 {
@@ -9,6 +10,7 @@ namespace MethodologyMain.Application.Interface
         Task DeleteTeamAsync(Guid teamId, Guid requestingUserId, CancellationToken token, bool isAdmin = false);
         Task<TeamEntity> GetTeamByIdAsync(Guid teamId, CancellationToken token);
         Task<List<Guid>> GetTeamMembersAsync(Guid teamId, CancellationToken token);
+        Task<List<TeamInfoDto>> GetTeamAllAsync(CancellationToken token);
         //Task<List<TeamEntity>> GetTeamsByEventIdAsync(Guid eventId);
         //Task<TeamEntity> GetUserTeamForEventAsync(Guid userId, Guid eventId);
         //Task<bool> IsUserTeamCaptainAsync(Guid teamId, Guid userId);

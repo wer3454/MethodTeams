@@ -222,6 +222,37 @@ namespace MethodologyMain.API.Controllers
             //}
         }
 
+        // Получение списка команд
+        [HttpGet]
+        public async Task<ActionResult<List<Team>>> GetTeamsAll(CancellationToken token)
+        {
+            _ = logQueueService.SendLogEventAsync(new RabbitMqLogPublish
+            {
+                ServiceName = "Main service",
+                LogLevel = LogEventLevel.Information,
+                Message = "GET api/Team was called",
+                TimeStamp = DateTime.UtcNow
+            });
+            var teams = await teamService.GetTeamAllAsync(token);
+            return Ok(teams);
+            //try
+            //{
+
+            //}
+            //catch (KeyNotFoundException)
+            //{
+            //    return NotFound();
+            //}
+            //catch (UnauthorizedAccessException ex)
+            //{
+            //    return Forbid(ex.Message);
+            //}
+            //catch (InvalidOperationException ex)
+            //{
+            //    return BadRequest(ex.Message);
+            //}
+        }
+
         //// Получение списка команд для события
         //[HttpGet("event/{eventId}")]
         //public async Task<ActionResult<List<Team>>> GetTeamsByEvent(Guid eventId)

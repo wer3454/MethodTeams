@@ -4,7 +4,7 @@ using MethodologyMain.Persistence.Interfaces;
 
 namespace MethodologyMain.Application.Services
 {
-    class TeamValidationService : ITeamValidationService
+    public class TeamValidationService : ITeamValidationService
     {
         public readonly ITeamRepository teamRepo;
         public TeamValidationService(ITeamRepository teamRepo)
