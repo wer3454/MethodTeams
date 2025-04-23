@@ -1,17 +1,19 @@
-﻿using AuthMetodology.Infrastructure.Interfaces;
-using AuthMetodology.Infrastructure.Models;
+﻿using AuthMetodology.Infrastructure.Models;
+using Microsoft.Extensions.Options;
+using RabbitMqModel.Models;
+using RabbitMqPublisher.Abstract;
 
 namespace MethodologyMain.Infrastructure.Services
 {
-    public class LogQueueService : ILogQueueService
+    public class LogQueueService : RabbitMqPublisherBase<RabbitMqLogPublish>
     {
-        private readonly IRabbitMqService rabbitMqService;
-        private readonly string QueueName = "LogQueue";
-        public LogQueueService(IRabbitMqService rabbitMqService) => this.rabbitMqService = rabbitMqService;
+        public LogQueueService(IOptions<RabbitMqOptions> options) : base(options) { }
 
-        public async Task SendLogEventAsync(RabbitMqLogPublish message)
+        public override string QueueName => "LogQueue";
+
+        public override async Task SendEventAsync(RabbitMqLogPublish message, CancellationToken cancellationToken = default)
         {
-            await rabbitMqService.SendMessageAsync(message, QueueName);
+            await SendMessageAsync(message, QueueName, cancellationToken);
         }
     }
 }

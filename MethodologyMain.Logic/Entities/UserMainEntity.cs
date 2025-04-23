@@ -10,7 +10,7 @@ namespace MethodologyMain.Logic.Entities
         [Column("id")]
         public required Guid Id { get; set; }
         [Column("birthDate")]
-        public DateTime BirthDate { get; set; }
+        public DateTime BirthDate { get; set; } = DateTime.MinValue;
         [Column("education")]
         public string Education { get; set; } = string.Empty;
         [Column("firstName")]

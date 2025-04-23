@@ -1,18 +1,18 @@
-﻿using AuthMetodology.Infrastructure.Interfaces;
+﻿using AuthMetodology.Infrastructure.Models;
 using MethodologyMain.Application.Exceptions;
+using RabbitMqPublisher.Interface;
 using Serilog.Events;
-using System.Threading.Tasks;
 
 namespace MethodologyMain.API.Middleware
 {
     public class ExceptionMiddleware
     {
         private readonly RequestDelegate next;
-        private readonly ILogQueueService logQueueService;
-        public ExceptionMiddleware(RequestDelegate next, ILogQueueService logQueueService)
+        private readonly IRabbitMqPublisherBase<RabbitMqLogPublish> logService;
+        public ExceptionMiddleware(RequestDelegate next, IRabbitMqPublisherBase<RabbitMqLogPublish> logService)
         {
             this.next = next;
-            this.logQueueService = logQueueService;
+            this.logService = logService;
         }
 
         public async Task InvokeAsync(HttpContext context)
@@ -23,13 +23,15 @@ namespace MethodologyMain.API.Middleware
             }
             catch (Exception ex)
             {
-                _ = logQueueService.SendLogEventAsync(new AuthMetodology.Infrastructure.Models.RabbitMqLogPublish {
+                _ = logService.SendEventAsync(new RabbitMqLogPublish
+                {
                     ServiceName = "Main service",
                     LogLevel = LogEventLevel.Error,
                     Message = $"Exception was thrown.\nMessage: {ex.Message}, {ex.InnerException}\nSource: {ex.Source}",
                     TimeStamp = DateTime.UtcNow
                 });
-                HandleException(ex,context);
+
+                await HandleException(ex,context);
             }
         }
 
