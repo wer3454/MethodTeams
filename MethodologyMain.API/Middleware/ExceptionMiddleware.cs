@@ -26,7 +26,7 @@ namespace MethodologyMain.API.Middleware
                 _ = logQueueService.SendLogEventAsync(new AuthMetodology.Infrastructure.Models.RabbitMqLogPublish {
                     ServiceName = "Main service",
                     LogLevel = LogEventLevel.Error,
-                    Message = $"Exception was thrown.\nMessage: {ex.Message}\nSource: {ex.Source}",
+                    Message = $"Exception was thrown.\nMessage: {ex.Message}, {ex.InnerException}\nSource: {ex.Source}",
                     TimeStamp = DateTime.UtcNow
                 });
                 HandleException(ex,context);

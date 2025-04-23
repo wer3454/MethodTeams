@@ -309,7 +309,7 @@ namespace MethodologyMain.API.Controllers
         //}
         private Guid GetCurrentUserId()
         {
-            return Guid.Parse("1");
+            return Guid.Parse("d5a492ca-9611-4fda-9ace-10ec38bb4d48");
         }
     }
 }
