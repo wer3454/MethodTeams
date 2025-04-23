@@ -10,6 +10,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.15" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.11" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.11">
       <PrivateAssets>all</PrivateAssets>
@@ -27,6 +28,15 @@
     <ProjectReference Include="..\MethodologyMain.Infrastructure\MethodologyMain.Infrastructure.csproj" />
     <ProjectReference Include="..\MethodologyMain.Logic\MethodologyMain.Logic.csproj" />
     <ProjectReference Include="..\MethodologyMain.Persistence\MethodologyMain.Persistence.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="RabbitMqModel">
+      <HintPath>..\MethodologyMain.Infrastructure\DLL\RabbitMqModel.dll</HintPath>
+    </Reference>
+    <Reference Include="RabbitMqPublisher">
+      <HintPath>..\MethodologyMain.Infrastructure\DLL\RabbitMqPublisher.dll</HintPath>
+    </Reference>
   </ItemGroup>
 
 </Project>
