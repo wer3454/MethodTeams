@@ -1,6 +1,7 @@
 ﻿using AuthMetodology.Infrastructure.Interfaces;
 using MethodologyMain.Application.Exceptions;
 using Serilog.Events;
+using System.Threading.Tasks;
 
 namespace MethodologyMain.API.Middleware
 {
@@ -22,7 +23,7 @@ namespace MethodologyMain.API.Middleware
             }
             catch (Exception ex)
             {
-                await logQueueService.SendLogEventAsync(new AuthMetodology.Infrastructure.Models.RabbitMqLogPublish {
+                _ = logQueueService.SendLogEventAsync(new AuthMetodology.Infrastructure.Models.RabbitMqLogPublish {
                     ServiceName = "Main service",
                     LogLevel = LogEventLevel.Error,
                     Message = $"Exception was thrown.\nMessage: {ex.Message}\nSource: {ex.Source}",
@@ -32,7 +33,7 @@ namespace MethodologyMain.API.Middleware
             }
         }
 
-        private static void HandleException(Exception ex, HttpContext context)
+        private static async Task HandleException(Exception ex, HttpContext context)
         {
             ExceptionResponse response = ex switch
             {
@@ -42,8 +43,12 @@ namespace MethodologyMain.API.Middleware
                 InvalidOperationException _ => new ExceptionResponse(ex.Message, System.Net.HttpStatusCode.Conflict),
                 UserNotFoundException _ => new ExceptionResponse("Пользователь не найден", System.Net.HttpStatusCode.Conflict),
                 UserNotInTeamException _ => new ExceptionResponse("Пользователь не в команде", System.Net.HttpStatusCode.Conflict),
-                _ => throw new NotImplementedException(),
+                _ => new ExceptionResponse(ex.Message, System.Net.HttpStatusCode.InternalServerError),
             };
+
+            context.Response.ContentType = "application/json";
+            context.Response.StatusCode = (int)response.Code;
+            await context.Response.WriteAsJsonAsync(response);
         }
     }
 }
