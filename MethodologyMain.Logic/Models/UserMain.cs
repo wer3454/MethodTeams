@@ -13,7 +13,7 @@ namespace MethodologyMain.Logic.Models
     public class UserMain
     {
         public required Guid Id { get; set; }
-        public DateTime BirthDate { get; set; }
+        public DateTime BirthDate { get; set; } = DateTime.MinValue;
         public string Education { get; set; } = string.Empty;
         public string FirstName { get; set; } = string.Empty;
         public string LastName { get; set; } = string.Empty;
