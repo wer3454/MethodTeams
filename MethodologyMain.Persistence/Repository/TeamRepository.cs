@@ -15,7 +15,7 @@ namespace MethodologyMain.Persistence.Repository
             CheckCancellation(token);
             var user = await _context.Users
                 .AsNoTracking()
-                .FirstAsync(e => e.Id == userId, token);
+                .FirstOrDefaultAsync(e => e.Id == userId, token);
             return user.Teams.Find(m => m.Team.HackathonId == hackathonId) != null;
         }
         public async Task<bool> CheckUserInTeamAsync(Guid userId, Guid teamId, CancellationToken token)
@@ -44,6 +44,7 @@ namespace MethodologyMain.Persistence.Repository
             var team = await GetTeamAsync(teamId, token);
             if (team.Members is not null) { var _ = team.Members.RemoveAll; }
             _context.Teams.Remove(team);
+            
             await SaveChangesAsync(token);
         }
         public async Task RemoveMemberAsync(Guid userId, Guid teamId, CancellationToken token)
@@ -75,6 +76,12 @@ namespace MethodologyMain.Persistence.Repository
             var team = await GetTeamAsync(teamId, token);
             return team.Members.Select(m => m.UserId).ToList();
         }
+        public async Task UpdateTeamAsync(TeamEntity team, CancellationToken token)
+        {
+            CheckCancellation(token);
+            _context.Update(team);
+            await _context.SaveChangesAsync(token);
+        }
         private static void CheckCancellation(CancellationToken token)
         {
             token.ThrowIfCancellationRequested();
@@ -82,14 +89,14 @@ namespace MethodologyMain.Persistence.Repository
         private async Task<TeamEntity> GetTeamNoTrackingAsync(Guid teamId, CancellationToken token)
         {
             CheckCancellation(token);
-            return await _context.Teams
+            return await _context.Teams.Include(m => m.Members)
                 .AsNoTracking()
-                .FirstAsync(e => e.Id == teamId, token);
+                .FirstOrDefaultAsync(e => e.Id == teamId, token);
         }
         private async Task<TeamEntity> GetTeamAsync(Guid teamId, CancellationToken token)
         {
             CheckCancellation(token);
-            return await _context.Teams.FindAsync([teamId], token);
+            return await _context.Teams.Include(m => m.Members).FirstOrDefaultAsync(m => m.Id == teamId);
         }
         private async Task SaveChangesAsync(CancellationToken token)
         {
