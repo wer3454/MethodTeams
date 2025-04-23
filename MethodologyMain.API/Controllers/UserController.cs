@@ -4,9 +4,9 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using MethodologyMain.Application.Interface;
-using AuthMetodology.Infrastructure.Interfaces;
 using AuthMetodology.Infrastructure.Models;
 using Serilog.Events;
+using RabbitMqPublisher.Interface;
 
 namespace MethodologyMain.API.Controllers
 {
@@ -15,16 +15,16 @@ namespace MethodologyMain.API.Controllers
     public class UserController : ControllerBase
     {
         private readonly ITeamService teamService;
-        private readonly ILogQueueService logQueueService;
-        public UserController(ITeamService teamService, ILogQueueService logQueueService)
+        private readonly IRabbitMqPublisherBase<RabbitMqLogPublish> logPublishService;
+        public UserController(ITeamService teamService, IRabbitMqPublisherBase<RabbitMqLogPublish> logPublishService)
         {
             this.teamService = teamService;
-            this.logQueueService = logQueueService;
+            this.logPublishService = logPublishService;
         }
         [HttpPost]
         public async Task<ActionResult<Team>> CreateTeam([FromBody] CreateTeamDto dto, CancellationToken token)
         {
-            _ = logQueueService.SendLogEventAsync(new RabbitMqLogPublish
+            _ = logPublishService.SendEventAsync(new RabbitMqLogPublish
             {
                 ServiceName = "Main service",
                 LogLevel = LogEventLevel.Information,
