@@ -1,8 +1,8 @@
 ﻿using MethodologyMain.Application.DTO;
 using MethodTeams.Models;
-using Microsoft.AspNetCore.Authorization;
+//using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
+//using System.Security.Claims;
 using MethodologyMain.Application.Interface;
 using AuthMetodology.Infrastructure.Interfaces;
 using AuthMetodology.Infrastructure.Models;
@@ -26,7 +26,7 @@ namespace MethodologyMain.API.Controllers
         //[Authorize]
         public async Task<ActionResult<Team>> CreateTeam([FromBody] CreateTeamDto dto, CancellationToken token)
         {
-            await logQueueService.SendLogEventAsync(new RabbitMqLogPublish
+            _ = logQueueService.SendLogEventAsync(new RabbitMqLogPublish
             {
                 ServiceName = "Main service",
                 LogLevel = LogEventLevel.Information,
@@ -50,7 +50,7 @@ namespace MethodologyMain.API.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<Team>> GetTeam(Guid id, CancellationToken token)
         {
-            await logQueueService.SendLogEventAsync(new RabbitMqLogPublish
+            _ = logQueueService.SendLogEventAsync(new RabbitMqLogPublish
             {
                 ServiceName = "Main service",
                 LogLevel = LogEventLevel.Information,
@@ -74,7 +74,7 @@ namespace MethodologyMain.API.Controllers
         //[Authorize]
         public async Task<ActionResult> DeleteTeam(Guid id, CancellationToken token)
         {
-            await logQueueService.SendLogEventAsync(new RabbitMqLogPublish
+            _ = logQueueService.SendLogEventAsync(new RabbitMqLogPublish
             {
                 ServiceName = "Main service",
                 LogLevel = LogEventLevel.Information,
@@ -101,11 +101,11 @@ namespace MethodologyMain.API.Controllers
         }
 
         // Добавление пользователя в команду
-        [HttpPost("{id}/members")]
+        [HttpPost("{id}/users")]
         //[Authorize]
         public async Task<ActionResult> AddMember(Guid id, [FromBody] AddUserDto dto, CancellationToken token)
         {
-            await logQueueService.SendLogEventAsync(new RabbitMqLogPublish
+            _ = logQueueService.SendLogEventAsync(new RabbitMqLogPublish
             {
                 ServiceName = "Main service",
                 LogLevel = LogEventLevel.Information,
@@ -134,11 +134,11 @@ namespace MethodologyMain.API.Controllers
         }
 
         // Удаление пользователя из команды
-        [HttpDelete("{id}/members/{userId}")]
+        [HttpDelete("{id}/users/{userId}")]
         //[Authorize]
         public async Task<ActionResult> RemoveMember(Guid id, Guid userId, CancellationToken token)
         {
-            await logQueueService.SendLogEventAsync(new RabbitMqLogPublish
+            _ = logQueueService.SendLogEventAsync(new RabbitMqLogPublish
             {
                 ServiceName = "Main service",
                 LogLevel = LogEventLevel.Information,
@@ -167,10 +167,10 @@ namespace MethodologyMain.API.Controllers
         }
 
         // Получение списка участников команды
-        [HttpGet("{id}/members")]
+        [HttpGet("{id}/users")]
         public async Task<ActionResult<List<int>>> GetTeamMembers(Guid id, CancellationToken token)
         {
-            await logQueueService.SendLogEventAsync(new RabbitMqLogPublish
+            _ = logQueueService.SendLogEventAsync(new RabbitMqLogPublish
             {
                 ServiceName = "Main service",
                 LogLevel = LogEventLevel.Information,
@@ -194,7 +194,7 @@ namespace MethodologyMain.API.Controllers
         //[Authorize]
         public async Task<ActionResult> TransferCaptainRights(Guid id, [FromBody] AddUserDto dto, CancellationToken token)
         {
-            await logQueueService.SendLogEventAsync(new RabbitMqLogPublish
+            _ = logQueueService.SendLogEventAsync(new RabbitMqLogPublish
             {
                 ServiceName = "Main service",
                 LogLevel = LogEventLevel.Information,
@@ -290,14 +290,14 @@ namespace MethodologyMain.API.Controllers
 
         //    return Ok(team);
 
-            //try
-            //{
-                
-            //}
-            //catch (Exception ex)
-            //{
-            //    return BadRequest(ex.Message);
-            //}
+        //try
+        //{
+
+        //}
+        //catch (Exception ex)
+        //{
+        //    return BadRequest(ex.Message);
+        //}
         //}
 
         // Вспомогательный метод для получения ID текущего пользователя
