@@ -15,13 +15,13 @@ namespace MethodologyMain.Persistence.Repository
 
         public async Task AddAsync(T entity, CancellationToken token)
         {
-            _context.Set<T>().Add(entity);
+            await _context.Set<T>().AddAsync(entity, token);
             await _context.SaveChangesAsync(token);
         }
 
         public async Task AddRangeAsync(IEnumerable<T> entities, CancellationToken token)
         {
-            _context.Set<T>().AddRange(entities);
+            await _context.Set<T>().AddRangeAsync(entities, token);
             await _context.SaveChangesAsync(token);
         }
 
@@ -32,12 +32,12 @@ namespace MethodologyMain.Persistence.Repository
 
         public async Task<IEnumerable<T>> GetAllAsync(CancellationToken token)
         {
-            return await _context.Set<T>().ToListAsync(token);
+            return await _context.Set<T>().AsNoTracking().ToListAsync(token);
         }
 
         public async Task<T?> GetByIdAsync(Guid id, CancellationToken token)
         {
-            return await _context.Set<T>().FindAsync([id], token);
+            return await _context.Set<T>().FindAsync(id, token);
         }
 
         public async Task RemoveAsync(T entity, CancellationToken token)
