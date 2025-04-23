@@ -70,6 +70,23 @@ namespace MethodTeams.Services
             await teamRepo.RemoveTeamAsync(teamId, token);
         }
 
+        public async Task UpdateTeamAsync(
+            Guid teamId, 
+            Team team,
+            Guid requestingUserId,
+            CancellationToken token,
+            bool isAdmin = false
+            )
+        {
+            await validation.CheckTeamExistsAsync(teamId, token);
+            await validation.CheckUserIsCaptainOrAdminAsync(teamId, requestingUserId, isAdmin, token);
+            var teamEntity = await teamRepo.GetByIdAsync(teamId, token);
+            teamEntity.Description = team.Description;
+            teamEntity.Name = team.Name;
+            teamEntity.HackathonId = team.HackathonId;
+            await teamRepo.UpdateTeamAsync(teamEntity, token);
+        }
+
         // Добавление пользователя в команду
         public async Task AddUserToTeamAsync(
             Guid teamId, 
@@ -129,11 +146,12 @@ namespace MethodTeams.Services
         }
 
         // Получение списка команд
-        public async Task<List<TeamInfoDto>> GetTeamAllAsync(CancellationToken token)
+        public async Task<List<TeamEntity>> GetTeamAllAsync(CancellationToken token)
         {
-            
+
             var teams = await teamRepo.GetAllAsync(token);
-            return mapper.Map<List<TeamInfoDto>>(teams);
+            //return mapper.Map<List<TeamInfoDto>>(teams);
+            return teams.ToList();
         }
 
         //// Проверка, является ли пользователь капитаном команды
