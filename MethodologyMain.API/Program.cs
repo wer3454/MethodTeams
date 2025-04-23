@@ -5,8 +5,6 @@ using System.Text.Json.Serialization;
 using MethodologyMain.Application.Interface;
 using MethodologyMain.Application.Services;
 using MethodologyMain.API.Middleware;
-using AuthMetodology.Infrastructure.Models;
-using AuthMetodology.Infrastructure.Interfaces;
 using MethodologyMain.Infrastructure.Services;
 using MethodologyMain.Persistence.Interfaces;
 using MethodologyMain.Persistence.Repository;
@@ -14,9 +12,16 @@ using MethodTeams.DTO;
 using System.Reflection;
 using MethodologyMain.Application.Profiles;
 using Microsoft.EntityFrameworkCore;
+using RabbitMqModel.Models;
+using RabbitMqPublisher.Interface;
+using AuthMetodology.Infrastructure.Models;
+using MethodologyMain.Infrastructure.Models;
+using MethodologyMain.API.Extensions;
+using Microsoft.Extensions.Options;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddApiAuthentication(builder.Services.BuildServiceProvider().GetRequiredService<IOptions<JWTOptions>>());
 
 builder.Services.AddControllers();
 builder.Services.AddControllers()
@@ -34,15 +39,19 @@ var configuration = new MapperConfiguration(static cfg =>
     cfg.AddGlobalIgnore("Item");
 }
 );
+IMapper mapper = configuration.CreateMapper();
+builder.Services.AddSingleton(mapper);
 
 builder.Services.Configure<RabbitMqOptions>(builder.Configuration.GetSection(nameof(RabbitMqOptions)));
+builder.Services.Configure<JWTOptions>(builder.Configuration.GetSection(nameof(JWTOptions)));
+
 
 builder.Services.AddScoped<ITeamService, TeamService>();
 builder.Services.AddAutoMapper(typeof(TeamProfile).Assembly, typeof(TeamInfoDto).Assembly);
 builder.Services.AddScoped<ITeamRepository, TeamRepository>();
 builder.Services.AddScoped<ITeamValidationService, TeamValidationService>();
-builder.Services.AddSingleton<ILogQueueService, LogQueueService>();
-builder.Services.AddSingleton<IRabbitMqService,RabbitMqService>();
+builder.Services.AddSingleton<IRabbitMqPublisherBase<RabbitMqLogPublish>, LogQueueService>();
+
 var connection = builder.Configuration.GetConnectionString("PostgresConnection");
 builder.Services.AddDbContext<MyDbContext>(opt => opt.UseNpgsql(connection));
 
