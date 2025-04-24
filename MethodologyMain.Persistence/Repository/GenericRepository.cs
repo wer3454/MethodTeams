@@ -37,7 +37,7 @@ namespace MethodologyMain.Persistence.Repository
 
         public async Task<T?> GetByIdAsync(Guid id, CancellationToken token)
         {
-            return await _context.Set<T>().FindAsync(id, token);
+            return await _context.Set<T>().FindAsync([id], token);
         }
 
         public async Task RemoveAsync(T entity, CancellationToken token)
