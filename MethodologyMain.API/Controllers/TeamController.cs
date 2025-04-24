@@ -8,6 +8,7 @@ using AuthMetodology.Infrastructure.Models;
 using Serilog.Events;
 using RabbitMqPublisher.Interface;
 using Newtonsoft.Json.Linq;
+using MethodTeams.DTO;
 namespace MethodologyMain.API.Controllers
 {
     [ApiController]
@@ -83,6 +84,22 @@ namespace MethodologyMain.API.Controllers
             //{
             //    return NotFound();
             //}
+        }
+
+        [HttpPut("{id}")]
+        //[Authorize]
+        public async Task<ActionResult> UpdateTeam(Guid id, [FromBody] TeamInfoDto dto, CancellationToken token)
+        {
+            _ = logPublishService.SendEventAsync(new RabbitMqLogPublish
+            {
+                ServiceName = "Main service",
+                LogLevel = LogEventLevel.Information,
+                Message = "Update api/Team/id was called",
+                TimeStamp = DateTime.UtcNow
+            }, token);
+            Guid currentUserId = GetCurrentUserId();
+            await teamService.UpdateTeamAsync(id, dto, currentUserId, token);
+            return NoContent();
         }
 
         // Удаление команды

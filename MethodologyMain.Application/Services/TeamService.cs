@@ -72,7 +72,7 @@ namespace MethodTeams.Services
 
         public async Task UpdateTeamAsync(
             Guid teamId, 
-            Team team,
+            TeamInfoDto team,
             Guid requestingUserId,
             CancellationToken token,
             bool isAdmin = false
@@ -81,6 +81,7 @@ namespace MethodTeams.Services
             await validation.CheckTeamExistsAsync(teamId, token);
             await validation.CheckUserIsCaptainOrAdminAsync(teamId, requestingUserId, isAdmin, token);
             var teamEntity = await teamRepo.GetByIdAsync(teamId, token);
+            if (teamEntity.Id != team.Id) throw new InvalidOperationException();
             teamEntity.Description = team.Description;
             teamEntity.Name = team.Name;
             teamEntity.HackathonId = team.HackathonId;

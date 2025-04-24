@@ -16,6 +16,7 @@ namespace MethodologyMain.Persistence.Repository
             var user = await _context.Users
                 .AsNoTracking()
                 .FirstOrDefaultAsync(e => e.Id == userId, token);
+            if (user == null) return true;
             return user.Teams.Find(m => m.Team.HackathonId == hackathonId) != null;
         }
         public async Task<bool> CheckUserInTeamAsync(Guid userId, Guid teamId, CancellationToken token)
