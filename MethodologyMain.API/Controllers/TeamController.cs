@@ -8,7 +8,6 @@ using AuthMetodology.Infrastructure.Models;
 using Serilog.Events;
 using RabbitMqPublisher.Interface;
 using Newtonsoft.Json.Linq;
-using MethodTeams.DTO;
 namespace MethodologyMain.API.Controllers
 {
     [ApiController]
@@ -38,10 +37,25 @@ namespace MethodologyMain.API.Controllers
             return Ok(data);
         }
 
+        // Получение списка команд
+        [HttpGet]
+        public async Task<ActionResult<List<TeamInfoDto>>> GetTeamsAll(CancellationToken token)
+        {
+            _ = logPublishService.SendEventAsync(new RabbitMqLogPublish
+            {
+                ServiceName = "Main service",
+                LogLevel = LogEventLevel.Information,
+                Message = "GET api/Team was called",
+                TimeStamp = DateTime.UtcNow
+            }, token);
+            var teams = await teamService.GetTeamAllAsync(token);
+            return Ok(teams);
+        }
+
         // Создание команды
         [HttpPost]
         //[Authorize]
-        public async Task<ActionResult<Team>> CreateTeam([FromBody] CreateTeamDto dto, CancellationToken token)
+        public async Task<ActionResult<TeamInfoDto>> CreateTeam([FromBody] CreateTeamDto dto, CancellationToken token)
         {
             _ = logPublishService.SendEventAsync(new RabbitMqLogPublish
             {
@@ -65,7 +79,7 @@ namespace MethodologyMain.API.Controllers
 
         // Получение информации о команде
         [HttpGet("{id}")]
-        public async Task<ActionResult<Team>> GetTeam(Guid id, CancellationToken token)
+        public async Task<ActionResult<TeamInfoDto>> GetTeam(Guid id, CancellationToken token)
         {
             _ = logPublishService.SendEventAsync(new RabbitMqLogPublish
             {
@@ -86,9 +100,9 @@ namespace MethodologyMain.API.Controllers
             //}
         }
 
-        [HttpPut("{id}")]
+        [HttpPut]
         //[Authorize]
-        public async Task<ActionResult> UpdateTeam(Guid id, [FromBody] TeamInfoDto dto, CancellationToken token)
+        public async Task<ActionResult> UpdateTeam([FromBody] UpdateTeamDto dto, CancellationToken token)
         {
             _ = logPublishService.SendEventAsync(new RabbitMqLogPublish
             {
@@ -98,7 +112,7 @@ namespace MethodologyMain.API.Controllers
                 TimeStamp = DateTime.UtcNow
             }, token);
             Guid currentUserId = GetCurrentUserId();
-            await teamService.UpdateTeamAsync(id, dto, currentUserId, token);
+            await teamService.UpdateTeamAsync(dto, currentUserId, token);
             return NoContent();
         }
 
@@ -255,36 +269,6 @@ namespace MethodologyMain.API.Controllers
             //}
         }
 
-        // Получение списка команд
-        [HttpGet]
-        public async Task<ActionResult<List<Team>>> GetTeamsAll(CancellationToken token)
-        {
-            _ = logPublishService.SendEventAsync(new RabbitMqLogPublish
-            {
-                ServiceName = "Main service",
-                LogLevel = LogEventLevel.Information,
-                Message = "GET api/Team was called",
-                TimeStamp = DateTime.UtcNow
-            }, token);
-            var teams = await teamService.GetTeamAllAsync(token);
-            return Ok(teams);
-            //try
-            //{
-
-            //}
-            //catch (KeyNotFoundException)
-            //{
-            //    return NotFound();
-            //}
-            //catch (UnauthorizedAccessException ex)
-            //{
-            //    return Forbid(ex.Message);
-            //}
-            //catch (InvalidOperationException ex)
-            //{
-            //    return BadRequest(ex.Message);
-            //}
-        }
 
         //// Получение списка команд для события
         //[HttpGet("event/{eventId}")]

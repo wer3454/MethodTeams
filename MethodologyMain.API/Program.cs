@@ -8,7 +8,6 @@ using MethodologyMain.API.Middleware;
 using MethodologyMain.Infrastructure.Services;
 using MethodologyMain.Persistence.Interfaces;
 using MethodologyMain.Persistence.Repository;
-using MethodTeams.DTO;
 using System.Reflection;
 using MethodologyMain.Application.Profiles;
 using Microsoft.EntityFrameworkCore;
@@ -18,6 +17,7 @@ using AuthMetodology.Infrastructure.Models;
 using MethodologyMain.Infrastructure.Models;
 using MethodologyMain.API.Extensions;
 using Microsoft.Extensions.Options;
+using MethodologyMain.Application.DTO;
 
 var builder = WebApplication.CreateBuilder(args);
 

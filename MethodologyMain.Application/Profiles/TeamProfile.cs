@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using MethodologyMain.Application.DTO;
 using MethodologyMain.Logic.Entities;
 using MethodTeams.Models;
 using System;
@@ -16,6 +17,11 @@ namespace MethodologyMain.Application.Profiles
             CreateMap<TeamEntity, Team>();
 
             CreateMap<Team, TeamEntity>();
+
+            CreateProjection<Team, TeamInfoDto>()
+                .ForMember(dto => dto.MemberCount, conf => conf.MapFrom(t => t.Members.Count));
+            CreateMap<TeamEntity, TeamInfoDto>()
+                .ForMember(dto => dto.MemberCount, conf => conf.MapFrom(t => t.Members.Count));
         }
     }
 }

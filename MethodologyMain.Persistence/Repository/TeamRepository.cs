@@ -1,6 +1,7 @@
 ﻿using MethodologyMain.Logic.Entities;
 using MethodologyMain.Persistence.Interfaces;
 using MethodTeams.Data;
+using MethodTeams.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace MethodologyMain.Persistence.Repository
@@ -83,6 +84,11 @@ namespace MethodologyMain.Persistence.Repository
             _context.Update(team);
             await _context.SaveChangesAsync(token);
         }
+        public async Task<List<TeamEntity>> GetTeamsAllAsync(CancellationToken token)
+        {
+            CheckCancellation(token);
+            return await _context.Teams.Include(m => m.Members).ToListAsync(token);
+        }
         private static void CheckCancellation(CancellationToken token)
         {
             token.ThrowIfCancellationRequested();
@@ -94,7 +100,7 @@ namespace MethodologyMain.Persistence.Repository
                 .AsNoTracking()
                 .FirstOrDefaultAsync(e => e.Id == teamId, token);
         }
-        private async Task<TeamEntity> GetTeamAsync(Guid teamId, CancellationToken token)
+        public async Task<TeamEntity> GetTeamAsync(Guid teamId, CancellationToken token)
         {
             CheckCancellation(token);
             return await _context.Teams.Include(m => m.Members).FirstOrDefaultAsync(m => m.Id == teamId);
