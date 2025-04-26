@@ -20,7 +20,6 @@ namespace MethodologyMain.Persistence.Repository
         public async Task<bool> CheckUserTeamInHackAsync(Guid userId, Guid hackathonId, CancellationToken token)
         {
             CheckCancellation(token);
-            token.ThrowIfCancellationRequested();
             var user = await _context.Users
                 .AsNoTracking()
                 .FirstOrDefaultAsync(e => e.Id == userId, token);
@@ -33,10 +32,10 @@ namespace MethodologyMain.Persistence.Repository
             _context.Users.Remove(user);
             await SaveChangesAsync(token);
         }
-        public async Task UpdateAsync(Guid userId, UserMain user, CancellationToken token)
+        public async Task UpdateAsync(UserMainEntity user, CancellationToken token)
         {
             CheckCancellation(token);
-            _context.Entry(user).State = EntityState.Modified;
+            _context.Update(user);
             await SaveChangesAsync(token);
         }
         private static void CheckCancellation(CancellationToken token)
