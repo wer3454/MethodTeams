@@ -18,7 +18,7 @@ namespace MethodologyMain.Logic.Entities
         [Column("lastName")]
         public string LastName { get; set; } = string.Empty;
         [Column("middleName")]
-        public string Surname { get; set; } = string.Empty;
+        public string MiddleName { get; set; } = string.Empty;
         [Column("userName")]
         public string UserName { get; set; } = string.Empty;
         [Column("Telegram")]
