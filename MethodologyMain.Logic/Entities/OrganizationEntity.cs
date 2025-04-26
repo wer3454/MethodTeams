@@ -1,10 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace MethodologyMain.Logic.Entities
 {
@@ -19,10 +14,10 @@ namespace MethodologyMain.Logic.Entities
         public required string Name { get; set; }
 
         [Column("description")]
-        public required string Description { get; set; }
+        public string Description { get; set; } = string.Empty;
 
-        [Column("linkToWebsite")]
-        public required string LinkToWebSite { get; set; } = string.Empty;
+        [Column("logo")]
+        public string Logo { get; set; } = string.Empty;
 
         public List<HackathonEntity> Hackathons { get; set; } = new List<HackathonEntity>();
     }
