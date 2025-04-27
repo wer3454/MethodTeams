@@ -32,8 +32,8 @@ namespace MethodologyMain.API.Controllers
                 TimeStamp = DateTime.UtcNow
             });
             Guid currentUserId = GetCurrentUserId(); // Получение ID текущего пользователя из токена
-            var team = await teamService.CreateTeamAsync(dto.Name, dto.Description, currentUserId, dto.EventId, token);
-            return Ok(team);
+            //var team = await teamService.CreateTeamAsync(dto.Name, dto.Description, currentUserId, dto.EventId, token);
+            return Ok();
         }
 
         private Guid GetCurrentUserId()
