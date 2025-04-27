@@ -25,10 +25,10 @@ jobs:
             #   shell: pwsh
 
             - name: Restore dependencies
-              run: dotnet restore --verbosity quiet ..\MethodologyMain.sln
+              run: dotnet restore --verbosity quiet ./MethodologyMain.sln
 
             - name: Build without warnings
-              run: dotnet build --configuration Release --no-restore ..\MethodologyMain.sln
+              run: dotnet build --configuration Release --no-restore ./MethodologyMain.sln
 
             # - name: Run tests
             #   run: dotnet test --verbosity normal
