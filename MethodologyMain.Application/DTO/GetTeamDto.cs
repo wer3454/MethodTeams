@@ -1,8 +1,6 @@
-﻿using MethodologyMain.Logic.Entities;
-
-namespace MethodologyMain.Application.DTO
+﻿namespace MethodologyMain.Application.DTO
 {
-    class GetTeamDto
+    public class GetTeamDto
     {
         public Guid Id { get; set; }
         public Guid HackathonId { get; set; }
