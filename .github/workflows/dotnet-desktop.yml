@@ -1,12 +1,12 @@
 on:
     push:
-        branches: [dev]
+        branches: [dev, dev1, wip/*, main]
     pull_request:
         branches: [main]
 
 jobs:
     build:
-        runs-on: self-hosted
+        runs-on: shimmer-jaspilite
         steps:
             - name: Checkout code
               uses: actions/checkout@v2
