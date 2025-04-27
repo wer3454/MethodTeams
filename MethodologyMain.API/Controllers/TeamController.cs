@@ -39,7 +39,7 @@ namespace MethodologyMain.API.Controllers
 
         // Получение списка команд
         [HttpGet]
-        public async Task<ActionResult<List<TeamInfoDto>>> GetTeamsAll(CancellationToken token)
+        public async Task<ActionResult<List<GetTeamDto>>> GetTeamsAll(CancellationToken token)
         {
             _ = logPublishService.SendEventAsync(new RabbitMqLogPublish
             {
@@ -55,7 +55,7 @@ namespace MethodologyMain.API.Controllers
         // Создание команды
         [HttpPost]
         //[Authorize]
-        public async Task<ActionResult<TeamInfoDto>> CreateTeam([FromBody] CreateTeamDto dto, CancellationToken token)
+        public async Task<ActionResult<CreateTeamDto>> CreateTeam([FromBody] CreateTeamDto dto, CancellationToken token)
         {
             _ = logPublishService.SendEventAsync(new RabbitMqLogPublish
             {
@@ -65,7 +65,7 @@ namespace MethodologyMain.API.Controllers
                 TimeStamp = DateTime.UtcNow
             }, token);
             Guid currentUserId = GetCurrentUserId(); // Получение ID текущего пользователя из токена
-            var team = await teamService.CreateTeamAsync(dto.Name, dto.Description, currentUserId, dto.EventId, token);
+            var team = await teamService.CreateTeamAsync(dto, currentUserId, token);
             return CreatedAtAction(nameof(GetTeam), new { id = team.Id }, team);
             //try
             //{
@@ -79,7 +79,7 @@ namespace MethodologyMain.API.Controllers
 
         // Получение информации о команде
         [HttpGet("{id}")]
-        public async Task<ActionResult<TeamInfoDto>> GetTeam(Guid id, CancellationToken token)
+        public async Task<ActionResult<GetTeamDto>> GetTeam(Guid id, CancellationToken token)
         {
             _ = logPublishService.SendEventAsync(new RabbitMqLogPublish
             {
@@ -215,7 +215,7 @@ namespace MethodologyMain.API.Controllers
 
         // Получение списка участников команды
         [HttpGet("{id}/users")]
-        public async Task<ActionResult<List<int>>> GetTeamMembers(Guid id, CancellationToken token)
+        public async Task<ActionResult<List<string>>> GetTeamMembers(Guid id, CancellationToken token)
         {
             _ = logPublishService.SendEventAsync(new RabbitMqLogPublish
             {

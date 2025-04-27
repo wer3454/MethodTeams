@@ -6,11 +6,11 @@ namespace MethodologyMain.Application.Interface
     public interface ITeamService
     {
         Task AddUserToTeamAsync(Guid teamId, Guid userId, Guid requestingUserId, CancellationToken token);
-        Task<TeamInfoDto> CreateTeamAsync(string name, string description, Guid captainId, Guid eventId, CancellationToken token);
+        Task<GetTeamDto> CreateTeamAsync(CreateTeamDto dto, Guid captainId, CancellationToken token);
         Task DeleteTeamAsync(Guid teamId, Guid requestingUserId, CancellationToken token, bool isAdmin = false);
-        Task<TeamInfoDto> GetTeamByIdAsync(Guid teamId, CancellationToken token);
-        Task<List<Guid>> GetTeamMembersAsync(Guid teamId, CancellationToken token);
-        Task<List<TeamInfoDto>> GetTeamAllAsync(CancellationToken token);
+        Task<GetTeamDto> GetTeamByIdAsync(Guid teamId, CancellationToken token);
+        Task<List<string>> GetTeamMembersAsync(Guid teamId, CancellationToken token);
+        Task<List<GetTeamDto>> GetTeamAllAsync(CancellationToken token);
         Task UpdateTeamAsync(UpdateTeamDto team, Guid requestingUserId, CancellationToken token, bool isAdmin = false);
         //Task<List<TeamEntity>> GetTeamsByEventIdAsync(Guid eventId);
         //Task<TeamEntity> GetUserTeamForEventAsync(Guid userId, Guid eventId);
