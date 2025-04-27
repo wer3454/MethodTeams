@@ -18,6 +18,7 @@ using MethodologyMain.Infrastructure.Models;
 using MethodologyMain.API.Extensions;
 using Microsoft.Extensions.Options;
 using MethodologyMain.Application.DTO;
+using MethodologyMain.Logic.Entities;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -35,10 +36,17 @@ builder.Services.AddSwaggerGen();
 var configuration = new MapperConfiguration(static cfg =>
 {
     cfg.AddMaps(Assembly.GetExecutingAssembly());
+    cfg.CreateMap<TeamEntity, GetTeamDto>()
+    .ForMember(dto => dto.CreatedBy, conf => conf.MapFrom(t => t.CaptainId))
+    .ForMember(dto => dto.Members, conf => conf.MapFrom(t => t.Members.Select(s => s.User.UserName).ToList()))
+    .ForMember(dto => dto.Tags, conf => conf.MapFrom(t => t.Tags.Select(s => s.Tag.TagName).ToList()))
+    .ForMember(dto => dto.CreatedAt, conf => conf.MapFrom(t => t.TeamCreatedAt));
+
     cfg.AllowNullCollections = true;
     cfg.AddGlobalIgnore("Item");
 }
 );
+configuration.AssertConfigurationIsValid();
 IMapper mapper = configuration.CreateMapper();
 builder.Services.AddSingleton(mapper);
 
