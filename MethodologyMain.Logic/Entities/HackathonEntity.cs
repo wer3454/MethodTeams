@@ -47,10 +47,10 @@ namespace MethodologyMain.Logic.Entities
         public string Website { get; set; } = string.Empty;
 
         [Column("prize")]
-        public required List<Prize> Prizes { get; set; }
+        public required string Prizes { get; set; }
 
         [Column("schedule")]
-        public required List<ScheduleItem> Schedule { get; set; }
+        public required string Schedule { get; set; }
 
         public OrganizationEntity Organization { get; set; } = null!;
 
