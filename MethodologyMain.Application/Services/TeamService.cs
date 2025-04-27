@@ -12,14 +12,17 @@ namespace MethodTeams.Services
     public class TeamService: ITeamService
     {
         private readonly ITeamRepository teamRepo;
+        private readonly ITagRepository tagRepo;
         private readonly ITeamValidationService validation;
         private readonly IMapper mapper;
         public TeamService(
             ITeamRepository teamRepo,
+            ITagRepository tagRepo,
             ITeamValidationService validation,
             IMapper mapper)
         {
             this.teamRepo = teamRepo;
+            this.tagRepo = tagRepo;
             this.validation = validation;
             this.mapper = mapper;
         }
@@ -28,7 +31,6 @@ namespace MethodTeams.Services
         public async Task<GetTeamDto> CreateTeamAsync(
             CreateTeamDto dto,
             Guid captainId, 
-            Guid HackathonId,
             CancellationToken token
             )
         {
@@ -54,7 +56,7 @@ namespace MethodTeams.Services
             };
             team.Members.Add(member);
             await teamRepo.AddAsync(team, token);
-            return mapper.Map<TeamInfoDto>(team);
+            await tagRepo.AddTeamTags(team.Id, dto.Tags, token);
             return mapper.Map<GetTeamDto>(team);
         }
 
