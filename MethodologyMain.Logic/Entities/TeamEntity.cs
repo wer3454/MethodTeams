@@ -21,6 +21,9 @@ namespace MethodologyMain.Logic.Entities
 
         [Column("captainId")]
         public required Guid CaptainId { get; set; }
+        
+        [Column("maxMembers")]
+        public int MaxMembers { get; set; }
 
         [Column("teamCreatedAt")]
         public DateTime TeamCreatedAt { get; set; } = DateTime.UtcNow;
