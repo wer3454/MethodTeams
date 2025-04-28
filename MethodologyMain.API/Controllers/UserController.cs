@@ -14,15 +14,45 @@ namespace MethodologyMain.API.Controllers
     [Route("api/[controller]")]
     public class UserController : ControllerBase
     {
-        private readonly ITeamService teamService;
+        private readonly IUserService userService;
         private readonly IRabbitMqPublisherBase<RabbitMqLogPublish> logPublishService;
-        public UserController(ITeamService teamService, IRabbitMqPublisherBase<RabbitMqLogPublish> logPublishService)
+        public UserController(IUserService userService, IRabbitMqPublisherBase<RabbitMqLogPublish> logPublishService)
         {
-            this.teamService = teamService;
+            this.userService = userService;
             this.logPublishService = logPublishService;
         }
+
+        [HttpGet]
+        public async Task<ActionResult<List<GetUserDto>>> GetUsers(CancellationToken token)
+        {
+            _ = logPublishService.SendEventAsync(new RabbitMqLogPublish
+            {
+                ServiceName = "Main service",
+                LogLevel = LogEventLevel.Information,
+                Message = "GET api/User was called",
+                TimeStamp = DateTime.UtcNow
+            });
+            var users = await userService.GetUsersAllAsync(token);
+            //var team = await teamService.CreateTeamAsync(dto.Name, dto.Description, currentUserId, dto.EventId, token);
+            return Ok(users);
+        }
+
+        [HttpGet("{id}")]
+        public async Task<ActionResult<List<GetUserDto>>> GetUsersById(Guid id, CancellationToken token)
+        {
+            _ = logPublishService.SendEventAsync(new RabbitMqLogPublish
+            {
+                ServiceName = "Main service",
+                LogLevel = LogEventLevel.Information,
+                Message = "GET api/User was called",
+                TimeStamp = DateTime.UtcNow
+            });
+            var user = await userService.GetUserByIdAsync(id, token);
+            //var team = await teamService.CreateTeamAsync(dto.Name, dto.Description, currentUserId, dto.EventId, token);
+            return Ok(user);
+        }
         [HttpPost]
-        public async Task<ActionResult<Team>> CreateTeam([FromBody] CreateTeamDto dto, CancellationToken token)
+        public async Task<ActionResult<GetUserDto>> CreateUser([FromBody] GetUserDto dto, CancellationToken token)
         {
             _ = logPublishService.SendEventAsync(new RabbitMqLogPublish
             {
@@ -31,14 +61,24 @@ namespace MethodologyMain.API.Controllers
                 Message = "POST api/User was called",
                 TimeStamp = DateTime.UtcNow
             });
-            Guid currentUserId = GetCurrentUserId(); // Получение ID текущего пользователя из токена
+            var user = await userService.CreateUserAsync(dto, token);
             //var team = await teamService.CreateTeamAsync(dto.Name, dto.Description, currentUserId, dto.EventId, token);
-            return Ok();
+            return Ok(user);
         }
 
-        private Guid GetCurrentUserId()
+        [HttpPut]
+        public async Task<ActionResult> UpdateUser([FromBody] GetUserDto dto, CancellationToken token)
         {
-            return Guid.Parse("1");
+            _ = logPublishService.SendEventAsync(new RabbitMqLogPublish
+            {
+                ServiceName = "Main service",
+                LogLevel = LogEventLevel.Information,
+                Message = "PUT api/User was called",
+                TimeStamp = DateTime.UtcNow
+            });
+            await userService.UpdateUserAsync(dto, token);
+            //var team = await teamService.CreateTeamAsync(dto.Name, dto.Description, currentUserId, dto.EventId, token);
+            return Ok();
         }
     }
 }

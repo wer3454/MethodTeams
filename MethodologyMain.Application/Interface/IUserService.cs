@@ -1,18 +1,14 @@
 ﻿using MethodologyMain.Application.DTO;
 using MethodologyMain.Logic.Entities;
-using MethodologyMain.Logic.Models;
 
 namespace MethodologyMain.Application.Interface
 {
     public interface IUserService
     {
-        Task<UserMainEntity> CreateUserAsync(
-            string UserName,
-            string description,
-            Guid captainId,
-            DateTime BirthDate,
-            CancellationToken token
-            );
-
+        Task<GetUserDto> CreateUserAsync(GetUserDto dto, CancellationToken token);
+        Task DeleteUserAsync(Guid userId, CancellationToken token);
+        Task<GetUserDto> GetUserByIdAsync(Guid userId, CancellationToken token);
+        Task<List<GetUserDto>> GetUsersAllAsync(CancellationToken token);
+        Task UpdateUserAsync(GetUserDto dto, CancellationToken token);
     }
 }

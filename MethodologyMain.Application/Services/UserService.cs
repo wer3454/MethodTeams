@@ -1,11 +1,12 @@
 ﻿using AutoMapper;
+using MethodologyMain.Application.DTO;
 using MethodologyMain.Logic.Entities;
-using MethodologyMain.Logic.Models;
+using MethodologyMain.Application.Interface;
 using MethodologyMain.Persistence.Interfaces;
 
 namespace MethodologyMain.Application.Services
 {
-    class UserService
+    public class UserService : IUserService
     {
         private readonly IUserRepository userRepo;
         private readonly IMapper mapper;
@@ -16,64 +17,42 @@ namespace MethodologyMain.Application.Services
         }
 
         // Создание нового пользователя
-        public async Task<UserMainEntity> CreateUserAsync(
-            string UserName,
-            string description,
-            Guid captainId,
-            DateTime BirthDate,
-            CancellationToken token
-            )
+        public async Task<GetUserDto> CreateUserAsync(GetUserDto dto, CancellationToken token)
         {
-            // Создание пользователя
-            var user = new UserMainEntity
-            {
-                Id = Guid.NewGuid(),
-                UserName = UserName,
-                BirthDate = BirthDate
-            };
+            var user = mapper.Map<UserMainEntity>(dto);
             await userRepo.AddAsync(user, token);
-            return user;
+            return dto;
         }
-
-        // Удаление команды (только капитаном или администратором)
-        public async Task DeleteUserAsync(
-            Guid userId,
-            Guid requestingUserId,
-            CancellationToken token,
-            bool isAdmin = false
-            )
+        public async Task DeleteUserAsync(Guid userId, CancellationToken token)
         {
-            throw new NotImplementedException();
+            await userRepo.RemoveAsync(userId, token);
             // await validation.CheckTeamExistsAsync(teamId, token);
             // await validation.CheckUserIsCaptainOrAdminAsync(teamId, requestingUserId, isAdmin, token);
             // await userRepo.RemoveAsync(teamId, token);
         }
-        public async Task UpdateUserAsync(
-            Guid userId,
-            Guid requestingUserId,
-            CancellationToken token,
-            bool isAdmin = false
-            )
+        public async Task UpdateUserAsync(GetUserDto dto, CancellationToken token)
         {
-            throw new NotImplementedException();
+            var user = mapper.Map<UserMainEntity>(dto);
+            await userRepo.UpdateAsync(user, token);
             // await validation.CheckTeamExistsAsync(teamId, token);
             // await validation.CheckUserIsCaptainOrAdminAsync(teamId, requestingUserId, isAdmin, token);
             // await userRepo.RemoveAsync(teamId, token);
         }
 
-        // Получение информации о команде по ID
-        public async Task<UserMainEntity> GetUserByIdAsync(Guid userId, CancellationToken token)
+        // Получение информации о пользователе по ID
+        public async Task<GetUserDto> GetUserByIdAsync(Guid userId, CancellationToken token)
         {
             // await validation.CheckTeamExistsAsync(teamId, token);
-            return await userRepo.GetByIdAsync(userId, token);
+            var user = await userRepo.GetByIdAsync(userId, token);
+            return mapper.Map<GetUserDto>(user);
         }
 
-        // Получение списка команд
-        public async Task<List<UserMain>> GetUsersAllAsync(CancellationToken token)
+        // Получение списка пользователей
+        public async Task<List<GetUserDto>> GetUsersAllAsync(CancellationToken token)
         {
 
-            var teams = await userRepo.GetAllAsync(token);
-            return mapper.Map<List<UserMain>>(teams);
+            var users = await userRepo.GetAllAsync(token);
+            return mapper.Map<List<GetUserDto>>(users);
         }
     }
 }

@@ -41,6 +41,10 @@ var configuration = new MapperConfiguration(static cfg =>
     .ForMember(dto => dto.Members, conf => conf.MapFrom(t => t.Members.Select(s => s.User.UserName).ToList()))
     .ForMember(dto => dto.Tags, conf => conf.MapFrom(t => t.Tags.Select(s => s.Tag.TagName).ToList()))
     .ForMember(dto => dto.CreatedAt, conf => conf.MapFrom(t => t.TeamCreatedAt));
+    cfg.CreateMap<UserMainEntity, GetUserDto>()
+    .ForMember(dto => dto.Tags, conf => conf.MapFrom(t => t.Tags.Select(s => s.Tag.TagName).ToList()))
+    .ForMember(dto => dto.Name, conf => conf.MapFrom(t => t.UserName))
+    .ForMember(dto => dto.Bio, conf => conf.MapFrom(t => t.Education));
 
     cfg.AllowNullCollections = true;
     cfg.AddGlobalIgnore("Item");
@@ -55,6 +59,7 @@ builder.Services.Configure<JWTOptions>(builder.Configuration.GetSection(nameof(J
 
 
 builder.Services.AddScoped<ITeamService, TeamService>();
+builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddAutoMapper(typeof(TeamProfile).Assembly, typeof(TeamInfoDto).Assembly);
 builder.Services.AddScoped<ITagRepository, TagRepository>();
 builder.Services.AddScoped<ITeamRepository, TeamRepository>();
