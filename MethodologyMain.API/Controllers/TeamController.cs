@@ -1,198 +1,319 @@
 ﻿using MethodologyMain.Application.DTO;
 using MethodTeams.Models;
-using Microsoft.AspNetCore.Authorization;
+//using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
+//using System.Security.Claims;
 using MethodologyMain.Application.Interface;
-
+using AuthMetodology.Infrastructure.Models;
+using Serilog.Events;
+using RabbitMqPublisher.Interface;
 namespace MethodologyMain.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
     public class TeamController : ControllerBase
     {
-        private readonly ITeamService _teamService;
-
-        public TeamController(ITeamService teamService)
+        private readonly ITeamService teamService;
+        private readonly IRabbitMqPublisherBase<RabbitMqLogPublish> logPublishService;
+        public TeamController(ITeamService teamService, IRabbitMqPublisherBase<RabbitMqLogPublish> logPublishService)
         {
-            _teamService = teamService;
+            this.teamService = teamService;
+            this.logPublishService = logPublishService;
+        }
+
+        //Тестовый эндпоинт
+        [HttpGet("dummy-data")]
+        public async Task<IActionResult> GetDummyData(CancellationToken cancellationToken)
+        {
+            _ = logPublishService.SendEventAsync(new RabbitMqLogPublish
+            {
+                ServiceName = "Main service",
+                LogLevel = LogEventLevel.Information,
+                Message = "POST api/Team/dummy-data was called",
+                TimeStamp = DateTime.UtcNow
+            }, cancellationToken);
+            string data = "Dataaa";
+            return Ok(data);
         }
 
         // Создание команды
         [HttpPost]
         //[Authorize]
-        public async Task<ActionResult<Team>> CreateTeam([FromBody] CreateTeamDto dto)
+        public async Task<ActionResult<Team>> CreateTeam([FromBody] CreateTeamDto dto, CancellationToken token)
         {
-            try
+            _ = logPublishService.SendEventAsync(new RabbitMqLogPublish
             {
-                Guid currentUserId = GetCurrentUserId(); // Получение ID текущего пользователя из токена
-                var team = await _teamService.CreateTeamAsync(dto.Name, dto.Description, currentUserId, dto.EventId);
-                return CreatedAtAction(nameof(GetTeam), new { id = team.Id }, team);
-            }
-            catch (InvalidOperationException ex)
-            {
-                return BadRequest(ex.Message);
-            }
+                ServiceName = "Main service",
+                LogLevel = LogEventLevel.Information,
+                Message = "POST api/Team was called",
+                TimeStamp = DateTime.UtcNow
+            }, token);
+            Guid currentUserId = GetCurrentUserId(); // Получение ID текущего пользователя из токена
+            var team = await teamService.CreateTeamAsync(dto.Name, dto.Description, currentUserId, dto.EventId, token);
+            return CreatedAtAction(nameof(GetTeam), new { id = team.Id }, team);
+            //try
+            //{
+                
+            //}
+            //catch (InvalidOperationException ex)
+            //{
+            //    return BadRequest(ex.Message);
+            //}
         }
 
         // Получение информации о команде
         [HttpGet("{id}")]
-        public async Task<ActionResult<Team>> GetTeam(Guid id)
+        public async Task<ActionResult<Team>> GetTeam(Guid id, CancellationToken token)
         {
-            try
+            _ = logPublishService.SendEventAsync(new RabbitMqLogPublish
             {
-                var team = await _teamService.GetTeamByIdAsync(id);
-                return Ok(team);
-            }
-            catch (KeyNotFoundException)
-            {
-                return NotFound();
-            }
+                ServiceName = "Main service",
+                LogLevel = LogEventLevel.Information,
+                Message = "GET api/Team/id was called",
+                TimeStamp = DateTime.UtcNow
+            }, token);
+            var team = await teamService.GetTeamByIdAsync(id, token);
+            return Ok(team);
+            //try
+            //{
+                
+            //}
+            //catch (KeyNotFoundException)
+            //{
+            //    return NotFound();
+            //}
         }
 
         // Удаление команды
         [HttpDelete("{id}")]
         //[Authorize]
-        public async Task<ActionResult> DeleteTeam(Guid id)
+        public async Task<ActionResult> DeleteTeam(Guid id, CancellationToken token)
         {
-            try
+            _ = logPublishService.SendEventAsync(new RabbitMqLogPublish
             {
-                Guid currentUserId = GetCurrentUserId();
-                bool isAdmin = User.IsInRole("Admin"); // Проверка роли администратора
+                ServiceName = "Main service",
+                LogLevel = LogEventLevel.Information,
+                Message = "DELETE api/Team/id was called",
+                TimeStamp = DateTime.UtcNow
+            }, token);
+            Guid currentUserId = GetCurrentUserId();
+            bool isAdmin = User.IsInRole("Admin"); // Проверка роли администратора
 
-                await _teamService.DeleteTeamAsync(id, currentUserId, isAdmin);
-                return NoContent();
-            }
-            catch (KeyNotFoundException)
-            {
-                return NotFound();
-            }
-            catch (UnauthorizedAccessException ex)
-            {
-                return Forbid(ex.Message);
-            }
+            await teamService.DeleteTeamAsync(id, currentUserId, token, isAdmin);
+            return NoContent();
+            //try
+            //{
+
+            //}
+            //catch (KeyNotFoundException)
+            //{
+            //    return NotFound();
+            //}
+            //catch (UnauthorizedAccessException ex)
+            //{
+            //    return Forbid(ex.Message);
+            //}
         }
 
         // Добавление пользователя в команду
-        [HttpPost("{id}/members")]
+        [HttpPost("{id}/users")]
         //[Authorize]
-        public async Task<ActionResult> AddMember(Guid id, [FromBody] AddUserDto dto)
+        public async Task<ActionResult> AddMember(Guid id, [FromBody] AddUserDto dto, CancellationToken token)
         {
-            try
+            _ = logPublishService.SendEventAsync(new RabbitMqLogPublish
             {
-                Guid currentUserId = GetCurrentUserId();
-                await _teamService.AddUserToTeamAsync(id, dto.UserId, currentUserId);
-                return NoContent();
-            }
-            catch (KeyNotFoundException)
-            {
-                return NotFound();
-            }
-            catch (UnauthorizedAccessException ex)
-            {
-                return Forbid(ex.Message);
-            }
-            catch (InvalidOperationException ex)
-            {
-                return BadRequest(ex.Message);
-            }
+                ServiceName = "Main service",
+                LogLevel = LogEventLevel.Information,
+                Message = "POST api/Team/id/members was called",
+                TimeStamp = DateTime.UtcNow
+            }, token);
+            Guid currentUserId = GetCurrentUserId();
+            await teamService.AddUserToTeamAsync(id, dto.UserId, currentUserId, token);
+            return NoContent();
+            //try
+            //{
+
+            //}
+            //catch (KeyNotFoundException)
+            //{
+            //    return NotFound();
+            //}
+            //catch (UnauthorizedAccessException ex)
+            //{
+            //    return Forbid(ex.Message);
+            //}
+            //catch (InvalidOperationException ex)
+            //{
+            //    return BadRequest(ex.Message);
+            //}
         }
 
         // Удаление пользователя из команды
-        [HttpDelete("{id}/members/{userId}")]
+        [HttpDelete("{id}/users/{userId}")]
         //[Authorize]
-        public async Task<ActionResult> RemoveMember(Guid id, Guid userId)
+        public async Task<ActionResult> RemoveMember(Guid id, Guid userId, CancellationToken token)
         {
-            try
+            _ = logPublishService.SendEventAsync(new RabbitMqLogPublish
             {
-                Guid currentUserId = GetCurrentUserId();
-                await _teamService.RemoveUserFromTeamAsync(id, userId, currentUserId);
-                return NoContent();
-            }
-            catch (KeyNotFoundException)
-            {
-                return NotFound();
-            }
-            catch (UnauthorizedAccessException ex)
-            {
-                return Forbid(ex.Message);
-            }
-            catch (InvalidOperationException ex)
-            {
-                return BadRequest(ex.Message);
-            }
+                ServiceName = "Main service",
+                LogLevel = LogEventLevel.Information,
+                Message = "DELETE api/Team/id/members/userId was called",
+                TimeStamp = DateTime.UtcNow
+            }, token);
+            Guid currentUserId = GetCurrentUserId();
+            await teamService.RemoveUserFromTeamAsync(id, userId, currentUserId, token);
+            return NoContent();
+            //try
+            //{
+                
+            //}
+            //catch (KeyNotFoundException)
+            //{
+            //    return NotFound();
+            //}
+            //catch (UnauthorizedAccessException ex)
+            //{
+            //    return Forbid(ex.Message);
+            //}
+            //catch (InvalidOperationException ex)
+            //{
+            //    return BadRequest(ex.Message);
+            //}
         }
 
         // Получение списка участников команды
-        [HttpGet("{id}/members")]
-        public async Task<ActionResult<List<int>>> GetTeamMembers(Guid id)
+        [HttpGet("{id}/users")]
+        public async Task<ActionResult<List<int>>> GetTeamMembers(Guid id, CancellationToken token)
         {
-            try
+            _ = logPublishService.SendEventAsync(new RabbitMqLogPublish
             {
-                var members = await _teamService.GetTeamMembersAsync(id);
-                return Ok(members);
-            }
-            catch (KeyNotFoundException)
-            {
-                return NotFound();
-            }
+                ServiceName = "Main service",
+                LogLevel = LogEventLevel.Information,
+                Message = "GET api/Team/id/members was called",
+                TimeStamp = DateTime.UtcNow
+            }, token);
+            var members = await teamService.GetTeamMembersAsync(id, token);
+            return Ok(members);
+            //try
+            //{
+                
+            //}
+            //catch (KeyNotFoundException)
+            //{
+            //    return NotFound();
+            //}
         }
 
         // Передача прав капитана
         [HttpPut("{id}/captain")]
         //[Authorize]
-        public async Task<ActionResult> TransferCaptainRights(Guid id, [FromBody] AddUserDto dto)
+        public async Task<ActionResult> TransferCaptainRights(Guid id, [FromBody] AddUserDto dto, CancellationToken token)
         {
-            try
+            _ = logPublishService.SendEventAsync(new RabbitMqLogPublish
             {
-                Guid currentUserId = GetCurrentUserId();
-                await _teamService.TransferCaptainRightsAsync(id, dto.UserId, currentUserId);
-                return NoContent();
-            }
-            catch (KeyNotFoundException)
-            {
-                return NotFound();
-            }
-            catch (UnauthorizedAccessException ex)
-            {
-                return Forbid(ex.Message);
-            }
-            catch (InvalidOperationException ex)
-            {
-                return BadRequest(ex.Message);
-            }
+                ServiceName = "Main service",
+                LogLevel = LogEventLevel.Information,
+                Message = "PUT api/Team/id/captain was called",
+                TimeStamp = DateTime.UtcNow
+            }, token);
+            Guid currentUserId = GetCurrentUserId();
+            await teamService.TransferCaptainRightsAsync(id, dto.UserId, currentUserId, token);
+            return NoContent();
+            //try
+            //{
+
+            //}
+            //catch (KeyNotFoundException)
+            //{
+            //    return NotFound();
+            //}
+            //catch (UnauthorizedAccessException ex)
+            //{
+            //    return Forbid(ex.Message);
+            //}
+            //catch (InvalidOperationException ex)
+            //{
+            //    return BadRequest(ex.Message);
+            //}
         }
 
-        // Получение списка команд для события
-        [HttpGet("event/{eventId}")]
-        public async Task<ActionResult<List<Team>>> GetTeamsByEvent(Guid eventId)
+        // Получение списка команд
+        [HttpGet]
+        public async Task<ActionResult<List<Team>>> GetTeamsAll(CancellationToken token)
         {
-            var teams = await _teamService.GetTeamsByEventIdAsync(eventId);
+            _ = logPublishService.SendEventAsync(new RabbitMqLogPublish
+            {
+                ServiceName = "Main service",
+                LogLevel = LogEventLevel.Information,
+                Message = "GET api/Team was called",
+                TimeStamp = DateTime.UtcNow
+            }, token);
+            var teams = await teamService.GetTeamAllAsync(token);
             return Ok(teams);
+            //try
+            //{
+
+            //}
+            //catch (KeyNotFoundException)
+            //{
+            //    return NotFound();
+            //}
+            //catch (UnauthorizedAccessException ex)
+            //{
+            //    return Forbid(ex.Message);
+            //}
+            //catch (InvalidOperationException ex)
+            //{
+            //    return BadRequest(ex.Message);
+            //}
         }
 
-        // Получение команды пользователя для конкретного события
-        [HttpGet("event/{eventId}/user")]
-        //[Authorize]
-        public async Task<ActionResult<Team>> GetUserTeamForEvent(Guid eventId)
-        {
-            try
-            {
-                Guid currentUserId = GetCurrentUserId();
-                var team = await _teamService.GetUserTeamForEventAsync(currentUserId, eventId);
+        //// Получение списка команд для события
+        //[HttpGet("event/{eventId}")]
+        //public async Task<ActionResult<List<Team>>> GetTeamsByEvent(Guid eventId)
+        //{
+        //    await logQueueService.SendLogEventAsync(new RabbitMqLogPublish
+        //    {
+        //        ServiceName = "Main service",
+        //        LogLevel = LogEventLevel.Information,
+        //        Message = "GET api/Team/event/eventId was called",
+        //        TimeStamp = DateTime.UtcNow
+        //    });
+        //    var teams = await _teamService.GetTeamsByEventIdAsync(eventId);
+        //    return Ok(teams);
+        //}
 
-                if (team == null)
-                {
-                    return NotFound();
-                }
+        //// Получение команды пользователя для конкретного события
+        //[HttpGet("event/{eventId}/user")]
+        ////[Authorize]
+        //public async Task<ActionResult<Team>> GetUserTeamForEvent(Guid eventId)
+        //{
+        //    await logQueueService.SendLogEventAsync(new RabbitMqLogPublish
+        //    {
+        //        ServiceName = "Main service",
+        //        LogLevel = LogEventLevel.Information,
+        //        Message = "GET api/Team/event/eventId/user was called",
+        //        TimeStamp = DateTime.UtcNow
+        //    });
+        //    Guid currentUserId = GetCurrentUserId();
+        //    var team = await _teamService.GetUserTeamForEventAsync(currentUserId, eventId);
 
-                return Ok(team);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
-        }
+        //    if (team == null)
+        //    {
+        //        return NotFound();
+        //    }
+
+        //    return Ok(team);
+
+        //try
+        //{
+
+        //}
+        //catch (Exception ex)
+        //{
+        //    return BadRequest(ex.Message);
+        //}
+        //}
 
         // Вспомогательный метод для получения ID текущего пользователя
         //private int GetCurrentUserId()
