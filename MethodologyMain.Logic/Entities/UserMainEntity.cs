@@ -25,6 +25,9 @@ namespace MethodologyMain.Logic.Entities
         [Column("middleName")]
         public string MiddleName { get; set; } = string.Empty;
 
+        [Column("email")]
+        public string Email { get; set; } = string.Empty;
+
         [Column("userName")]
         public string UserName { get; set; } = string.Empty;
 
