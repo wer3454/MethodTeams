@@ -13,6 +13,10 @@ namespace MethodologyMain.Logic.Entities
         public DateTime BirthDate { get; set; } = DateTime.MinValue;
         [Column("education")]
         public string Education { get; set; } = string.Empty;
+
+        [Column("email")]
+        public string Email { get; set; } = string.Empty;
+
         [Column("firstName")]
         public string FirstName { get; set; } = string.Empty;
         [Column("lastName")]
