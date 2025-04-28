@@ -1,15 +1,10 @@
 ﻿using MethodologyMain.Logic.Entities;
-using MethodologyMain.Logic.Models;
+using MethodologyMain.Persistence.Interfaces;
 using MethodTeams.Data;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace MethodologyMain.Persistence.Repository
 {
-    public class UserRepository: GenericRepository<UserMainEntity>
+    public class UserRepository: GenericRepository<UserMainEntity>, IUserRepository
     {
         public UserRepository(MyDbContext context) : base(context)
         {
