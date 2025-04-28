@@ -7,7 +7,6 @@ using MethodologyMain.Application.Interface;
 using AuthMetodology.Infrastructure.Models;
 using Serilog.Events;
 using RabbitMqPublisher.Interface;
-using Newtonsoft.Json.Linq;
 namespace MethodologyMain.API.Controllers
 {
     [ApiController]
