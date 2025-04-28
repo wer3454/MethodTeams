@@ -152,11 +152,20 @@ namespace MethodTeams.Services
             return await teamRepo.GetTeamMembersAsync(teamId, token);
         }
 
+        // Получение команды пользователя для конкретного события
+        public async Task<List<GetTeamDto>> GetTeamForHackathonAsync(Guid hackathonId, CancellationToken token)
+        {
+            var teams =  await teamRepo.GetTeamByHackathonAsync(hackathonId, token);
+            if (teams is null) return [];
+            return mapper.ProjectTo<GetTeamDto>(teams.AsQueryable()).ToList();
+        }
+
         // Получение списка команд
         public async Task<List<GetTeamDto>> GetTeamAllAsync(CancellationToken token)
         {
 
             var teams = await teamRepo.GetTeamsAllAsync(token);
+            if (teams is null) return [];
             //return mapper.Map<List<TeamInfoDto>>(teams);
             return mapper.ProjectTo<GetTeamDto>(teams.AsQueryable()).ToList();
         }

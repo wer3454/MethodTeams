@@ -11,6 +11,7 @@ namespace MethodologyMain.Application.Interface
         Task<GetTeamDto> GetTeamByIdAsync(Guid teamId, CancellationToken token);
         Task<List<string>> GetTeamMembersAsync(Guid teamId, CancellationToken token);
         Task<List<GetTeamDto>> GetTeamAllAsync(CancellationToken token);
+        Task<List<GetTeamDto>> GetTeamForHackathonAsync(Guid hackathonId, CancellationToken token);
         Task UpdateTeamAsync(UpdateTeamDto team, Guid requestingUserId, CancellationToken token, bool isAdmin = false);
         //Task<List<TeamEntity>> GetTeamsByEventIdAsync(Guid eventId);
         //Task<TeamEntity> GetUserTeamForEventAsync(Guid userId, Guid eventId);

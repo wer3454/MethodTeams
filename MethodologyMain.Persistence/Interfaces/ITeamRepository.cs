@@ -11,6 +11,7 @@ namespace MethodologyMain.Persistence.Interfaces
         Task<Guid?> GetCaptainIdAsync(Guid teamId, CancellationToken token);
         Task<Guid?> GetHackathonIdAsync(Guid teamId, CancellationToken token);
         Task<List<string>?> GetTeamMembersAsync(Guid teamId, CancellationToken token);
+        Task<List<TeamEntity>?> GetTeamByHackathonAsync(Guid HackathonId, CancellationToken token);
         Task UpdateTeamAsync(TeamEntity team, CancellationToken token);
         Task<List<TeamEntity>> GetTeamsAllAsync(CancellationToken token);
         Task<TeamEntity> GetTeamAsync(Guid teamId, CancellationToken token);
