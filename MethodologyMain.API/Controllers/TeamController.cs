@@ -111,7 +111,7 @@ namespace MethodologyMain.API.Controllers
                 Message = "POST api/Team/id/users/userId was called",
                 TimeStamp = DateTime.UtcNow
             }, token);
-            await teamService.AddUserToTeamAsync(id, userId, userId, token);
+            await teamService.JoinUserToTeamAsync(id, userId, token);
             return NoContent();
         }
 
@@ -127,7 +127,7 @@ namespace MethodologyMain.API.Controllers
                 Message = "DELETE api/Team/id/users/userId was called",
                 TimeStamp = DateTime.UtcNow
             }, token);
-            await teamService.RemoveUserFromTeamAsync(id, userId, userId, token);
+            await teamService.LeaveUserFromTeamAsync(id, userId, token);
             return NoContent();
         }
 

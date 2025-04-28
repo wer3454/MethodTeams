@@ -125,6 +125,34 @@ namespace MethodTeams.Services
             await validation.CheckUserInTeamAsync(userId, teamId, token);
             await teamRepo.RemoveMemberAsync(userId, teamId, token);
         }
+
+        // Добавление пользователя в команду
+        public async Task JoinUserToTeamAsync(
+            Guid teamId,
+            Guid userId,
+            CancellationToken token
+            )
+        {
+            await validation.CheckTeamExistsAsync(teamId, token);
+            Guid hackathonId = (Guid)await teamRepo.GetHackathonIdAsync(teamId, token);
+            await validation.CheckUserNotInTeamAsync(userId, teamId, token);
+            await validation.CheckUserNotInAnyTeamForHackathonAsync(userId, hackathonId, token);
+            await teamRepo.AddMemberAsync(userId, teamId, token);
+        }
+
+        // Удаление пользователя из команды
+        public async Task LeaveUserFromTeamAsync(
+            Guid teamId,
+            Guid userId,
+            CancellationToken token
+            )
+        {
+            await validation.CheckTeamExistsAsync(teamId, token);
+            // Нельзя удалить капитана
+            await validation.CheckCaptainKick(teamId, userId, token);
+            await validation.CheckUserInTeamAsync(userId, teamId, token);
+            await teamRepo.RemoveMemberAsync(userId, teamId, token);
+        }
         // Передача прав капитана
         public async Task TransferCaptainRightsAsync(
             Guid teamId, 
