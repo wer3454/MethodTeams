@@ -41,7 +41,7 @@ namespace MethodologyMain.Infrastructure.Listeners
                 {
                     Id = data.UserId,
                     UserName = data.UserName,
-                 
+                    Email = data.Email,                    
                 });
             }
             
