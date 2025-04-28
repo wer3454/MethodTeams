@@ -7,11 +7,10 @@ using MethodologyMain.Application.Interface;
 using AuthMetodology.Infrastructure.Models;
 using Serilog.Events;
 using RabbitMqPublisher.Interface;
-using Newtonsoft.Json.Linq;
 namespace MethodologyMain.API.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/main/[controller]")]
     public class TeamController : ControllerBase
     {
         private readonly ITeamService teamService;

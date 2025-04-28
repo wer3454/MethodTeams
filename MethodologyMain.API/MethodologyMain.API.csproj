@@ -31,6 +31,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Reference Include="RabbitMqListener">
+      <HintPath>..\MethodologyMain.Infrastructure\DLL\RabbitMqListener.dll</HintPath>
+    </Reference>
     <Reference Include="RabbitMqModel">
       <HintPath>..\MethodologyMain.Infrastructure\DLL\RabbitMqModel.dll</HintPath>
     </Reference>
