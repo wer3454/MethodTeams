@@ -8,6 +8,6 @@ namespace MethodologyMain.Infrastructure.Models
 {
     public class JWTOptions
     {
-        public string SecurityKey { get; set; }
+        public required string SecurityKey { get; set; }
     }
 }
