@@ -18,10 +18,10 @@ using AuthMetodology.Infrastructure.Models;
 using MethodologyMain.Infrastructure.Models;
 using MethodologyMain.API.Extensions;
 using Microsoft.Extensions.Options;
+using RabbitMqListener.Interfaces;
+using MethodologyMain.Infrastructure.Listeners;
 
 var builder = WebApplication.CreateBuilder(args);
-
-builder.Services.AddApiAuthentication(builder.Services.BuildServiceProvider().GetRequiredService<IOptions<JWTOptions>>());
 
 builder.Services.AddControllers();
 builder.Services.AddControllers()
@@ -45,12 +45,17 @@ builder.Services.AddSingleton(mapper);
 builder.Services.Configure<RabbitMqOptions>(builder.Configuration.GetSection(nameof(RabbitMqOptions)));
 builder.Services.Configure<JWTOptions>(builder.Configuration.GetSection(nameof(JWTOptions)));
 
+builder.Services.AddApiAuthentication(builder.Services.BuildServiceProvider().GetRequiredService<IOptions<JWTOptions>>());
 
 builder.Services.AddScoped<ITeamService, TeamService>();
 builder.Services.AddAutoMapper(typeof(TeamProfile).Assembly, typeof(TeamInfoDto).Assembly);
 builder.Services.AddScoped<ITeamRepository, TeamRepository>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<ITeamValidationService, TeamValidationService>();
 builder.Services.AddSingleton<IRabbitMqPublisherBase<RabbitMqLogPublish>, LogQueueService>();
+
+builder.Services.AddHostedService<RabbitMqUserRegisterListener>()
+    .AddSingleton<IRabbitMqListenerBase, RabbitMqUserRegisterListener>();
 
 var connection = builder.Configuration.GetConnectionString("PostgresConnection");
 builder.Services.AddDbContext<MyDbContext>(opt => opt.UseNpgsql(connection));
@@ -65,8 +70,8 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-//app.UseAuthorization();
-//app.UseAuthentication();
+app.UseAuthorization();
+app.UseAuthentication();
 
 app.MapControllers();
 
