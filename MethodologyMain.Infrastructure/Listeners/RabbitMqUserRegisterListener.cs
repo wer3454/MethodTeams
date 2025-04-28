@@ -39,7 +39,9 @@ namespace MethodologyMain.Infrastructure.Listeners
                 var context = scope.ServiceProvider.GetRequiredService<IUserRepository>();
                 await context.AddAsync(new UserMainEntity
                 {
-                    Id = data.UserId
+                    Id = data.UserId,
+                    UserName = data.UserName,
+                 
                 });
             }
             
