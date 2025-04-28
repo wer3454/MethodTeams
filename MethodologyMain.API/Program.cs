@@ -56,7 +56,10 @@ builder.Services.Configure<JWTOptions>(builder.Configuration.GetSection(nameof(J
 
 builder.Services.AddScoped<ITeamService, TeamService>();
 builder.Services.AddAutoMapper(typeof(TeamProfile).Assembly, typeof(TeamInfoDto).Assembly);
+builder.Services.AddScoped<ITagRepository, TagRepository>();
 builder.Services.AddScoped<ITeamRepository, TeamRepository>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IHackathonRepository, HackathonRepository>();
 builder.Services.AddScoped<ITeamValidationService, TeamValidationService>();
 builder.Services.AddSingleton<IRabbitMqPublisherBase<RabbitMqLogPublish>, LogQueueService>();
 
