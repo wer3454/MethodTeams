@@ -435,6 +435,8 @@ namespace MethodologyMain.Persistence.Migrations
                     b.Navigation("Tags");
 
                     b.Navigation("Teams");
+
+                    b.Navigation("Tracks");
                 });
 
             modelBuilder.Entity("MethodologyMain.Logic.Entities.OrganizationEntity", b =>
