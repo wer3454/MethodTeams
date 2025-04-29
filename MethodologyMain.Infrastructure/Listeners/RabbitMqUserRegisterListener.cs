@@ -43,8 +43,7 @@ namespace MethodologyMain.Infrastructure.Listeners
                     UserName = data.UserName,
                     Email = data.Email,                    
                 });
-            }
-            
+            }           
         }
     }
 }
