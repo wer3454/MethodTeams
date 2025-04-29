@@ -1,8 +1,5 @@
 ﻿using MethodologyMain.Application.DTO;
-using MethodTeams.Models;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
 using MethodologyMain.Application.Interface;
 using AuthMetodology.Infrastructure.Models;
 using Serilog.Events;
@@ -11,7 +8,7 @@ using RabbitMqPublisher.Interface;
 namespace MethodologyMain.API.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/main/[controller]")]
     public class UserController : ControllerBase
     {
         private readonly IUserService userService;
