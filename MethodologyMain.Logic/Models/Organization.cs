@@ -14,9 +14,9 @@ namespace MethodologyMain.Logic.Models
 
         public required string Name { get; set; }
 
-        public required string Description { get; set; }
+        public string Description { get; set; } = string.Empty;
 
-        public required string LinkToWebSite { get; set; } = string.Empty;
+        public string Logo { get; set; } = string.Empty;
 
         public List<HackathonEntity> Hackathons { get; set; } = new List<HackathonEntity>();
     }

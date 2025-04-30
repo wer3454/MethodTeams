@@ -8,7 +8,6 @@ using MethodologyMain.API.Middleware;
 using MethodologyMain.Infrastructure.Services;
 using MethodologyMain.Persistence.Interfaces;
 using MethodologyMain.Persistence.Repository;
-using MethodTeams.DTO;
 using System.Reflection;
 using MethodologyMain.Application.Profiles;
 using Microsoft.EntityFrameworkCore;
@@ -20,8 +19,18 @@ using MethodologyMain.API.Extensions;
 using Microsoft.Extensions.Options;
 using RabbitMqListener.Interfaces;
 using MethodologyMain.Infrastructure.Listeners;
+using MethodologyMain.Application.DTO;
+using MethodologyMain.Logic.Entities;
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
+
+var logger = new LoggerConfiguration()
+    .WriteTo.Console()
+    .CreateLogger();
+
+builder.Logging.ClearProviders();
+builder.Logging.AddSerilog(logger);
 
 builder.Services.AddControllers();
 builder.Services.AddControllers()
@@ -35,10 +44,21 @@ builder.Services.AddSwaggerGen();
 var configuration = new MapperConfiguration(static cfg =>
 {
     cfg.AddMaps(Assembly.GetExecutingAssembly());
+    cfg.CreateMap<TeamEntity, GetTeamDto>()
+    .ForMember(dto => dto.CreatedBy, conf => conf.MapFrom(t => t.CaptainId))
+    .ForMember(dto => dto.Members, conf => conf.MapFrom(t => t.Members.Select(s => s.User.UserName).ToList()))
+    .ForMember(dto => dto.Tags, conf => conf.MapFrom(t => t.Tags.Select(s => s.Tag.TagName).ToList()))
+    .ForMember(dto => dto.CreatedAt, conf => conf.MapFrom(t => t.TeamCreatedAt));
+    cfg.CreateMap<UserMainEntity, GetUserDto>()
+    .ForMember(dto => dto.Tags, conf => conf.MapFrom(t => t.Tags.Select(s => s.Tag.TagName).ToList()))
+    .ForMember(dto => dto.Name, conf => conf.MapFrom(t => t.UserName))
+    .ForMember(dto => dto.Bio, conf => conf.MapFrom(t => t.Education));
+
     cfg.AllowNullCollections = true;
     cfg.AddGlobalIgnore("Item");
 }
 );
+configuration.AssertConfigurationIsValid();
 IMapper mapper = configuration.CreateMapper();
 builder.Services.AddSingleton(mapper);
 
@@ -48,9 +68,12 @@ builder.Services.Configure<JWTOptions>(builder.Configuration.GetSection(nameof(J
 builder.Services.AddApiAuthentication(builder.Services.BuildServiceProvider().GetRequiredService<IOptions<JWTOptions>>());
 
 builder.Services.AddScoped<ITeamService, TeamService>();
+builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddAutoMapper(typeof(TeamProfile).Assembly, typeof(TeamInfoDto).Assembly);
+builder.Services.AddScoped<ITagRepository, TagRepository>();
 builder.Services.AddScoped<ITeamRepository, TeamRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IHackathonRepository, HackathonRepository>();
 builder.Services.AddScoped<ITeamValidationService, TeamValidationService>();
 builder.Services.AddSingleton<IRabbitMqPublisherBase<RabbitMqLogPublish>, LogQueueService>();
 
@@ -70,6 +93,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.UseCors("AllowFrontend");
 app.UseAuthorization();
 app.UseAuthentication();
 

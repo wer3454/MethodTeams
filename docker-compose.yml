@@ -1,0 +1,82 @@
+name: authMetodologyService
+
+services:
+  methodologymain.api:
+    image: ${DOCKER_REGISTRY-}methodologymainapi
+    build:
+      context: .
+      dockerfile: MethodologyMain.API/Dockerfile
+
+  postgres:
+    container_name: auth_db
+    image: postgres:latest
+    volumes: 
+      - postgres-data:/var/lib/postgresql/data    
+    environment:
+      POSTGRES_DB: authdb
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: password123!
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d authdb"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+    networks:
+      - authNet
+    restart: unless-stopped
+
+  pgadmin:
+    container_name: pgadmin
+    image: dpage/pgadmin4:latest
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@example.com
+      PGADMIN_DEFAULT_PASSWORD: password
+    ports:
+      - "5050:80"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - authNet
+    restart: unless-stopped
+
+  rabbitmq:
+    image: rabbitmq:management-alpine
+    container_name: rabbitmqForAuth
+    volumes: 
+      - rabbit-data:/var/lib/rabbitmq   
+    restart: always
+    ports:
+      - 5672:5672
+      - 15672:15672
+    networks:
+      - authNet
+    depends_on:
+      postgres:
+        condition: service_healthy
+  
+  redis:
+    image: redis
+    restart: always
+    volumes: 
+      - redis-data:/data
+    ports:
+      - "6379:6379"
+    networks:
+      - authNet
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+networks:
+  authNet:
+    name: authNet
+    driver: bridge
+
+volumes:
+  postgres-data:
+  rabbit-data:
+  redis-data:
+  grafana-data:

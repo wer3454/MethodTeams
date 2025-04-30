@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MethodologyMain.Logic.Models;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -21,8 +22,20 @@ namespace MethodologyMain.Logic.Entities
         [Column("name")]
         public required string Name { get; set; }
 
-        [Column("prize")]
-        public required decimal Prize { get; set; }
+        [Column("description")]
+        public string Description { get; set; } = string.Empty;
+
+        [Column("startDate")]
+        public required DateOnly StartDate { get; set; }
+
+        [Column("endDate")]
+        public required DateOnly EndDate { get; set; }
+
+        [Column("location")]
+        public string Location { get; set; } = string.Empty;
+
+        [Column("imageUrl")]
+        public string ImageUrl { get; set; } = string.Empty;
 
         [Column("minTeamSize")]
         public required int MinTeamSize { get; set; }
@@ -30,21 +43,19 @@ namespace MethodologyMain.Logic.Entities
         [Column("maxTeamSize")]
         public required int MaxTeamSize { get; set; }
 
-        [Column("startDate")]
-        public required DateTime StartDate { get; set; }
+        [Column("website")]
+        public string Website { get; set; } = string.Empty;
 
-        [Column("endDate")]
-        public required DateTime EndDate { get; set; }
+        [Column("prize")]
+        public required string Prizes { get; set; }
 
-        [Column("additionalInfo")]
-        public string AdditionalInfo { get; set; } = string.Empty;
+        [Column("schedule")]
+        public required string Schedule { get; set; }
 
         public OrganizationEntity Organization { get; set; } = null!;
 
         public List<TeamEntity> Teams { get; set; } = new List<TeamEntity>();
 
         public List<HackathonTagEntity> Tags { get; set; } = new List<HackathonTagEntity>();
-
-        public List<TrackEntity> Tracks { get; set; } = new List<TrackEntity>();
     }
 }

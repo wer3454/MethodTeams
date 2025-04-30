@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -10,30 +11,22 @@ namespace MethodologyMain.Logic.Models
 {
     public class Hackathon
     {
-        public required Guid Id { get; set; }
-
-        public required Guid OrganizationId { get; set; }
-
+        public Guid Id { get; set; }
         public required string Name { get; set; }
-
-        public required decimal Prize { get; set; }
-
-        public required int MinTeamSize { get; set; }
-
-        public required int MaxTeamSize { get; set; }
-
-        public required DateTime StartDate { get; set; }
-
-        public required DateTime EndDate { get; set; }
-
-        public string AdditionalInfo { get; set; } = string.Empty;
-
+        public string Description { get; set; } = string.Empty;
+        public required Guid OrganizationId { get; set; }
+        public required DateOnly StartDate { get; set; }
+        public required DateOnly EndDate { get; set; }
+        public string Location { get; set; } = string.Empty;
+        public string ImageUrl { get; set; } = string.Empty;
+        public string Website { get; set; } = string.Empty;
+        public TeamSize TeamSize { get; set; } = null!;
+        public int MinMembers { get; set; } = 2;
+        public int MaxMembers { get; set; } = 8;
+        public List<Prize> Prizes { get; set; } = null!;
+        public List<ScheduleItem> Schedule { get; set; } = null!;
         public OrganizationEntity Organization { get; set; } = null!;
-
-        public List<TeamEntity> Teams { get; set; } = new List<TeamEntity>();
-
         public List<HackathonTagEntity> Tags { get; set; } = new List<HackathonTagEntity>();
-
-        public List<TrackEntity> Tracks { get; set; } = new List<TrackEntity>();
+        public List<TeamEntity> Teams { get; set; } = new List<TeamEntity>();
     }
 }

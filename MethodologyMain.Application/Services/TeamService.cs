@@ -5,44 +5,46 @@ using MethodologyMain.Application.Exceptions;
 using MethodTeams.Models;
 using AutoMapper;
 using MethodologyMain.Logic.Models;
-using MethodTeams.DTO;
+using MethodologyMain.Application.DTO;
 
 namespace MethodTeams.Services
 {
     public class TeamService: ITeamService
     {
         private readonly ITeamRepository teamRepo;
+        private readonly ITagRepository tagRepo;
         private readonly ITeamValidationService validation;
         private readonly IMapper mapper;
         public TeamService(
             ITeamRepository teamRepo,
+            ITagRepository tagRepo,
             ITeamValidationService validation,
             IMapper mapper)
         {
             this.teamRepo = teamRepo;
+            this.tagRepo = tagRepo;
             this.validation = validation;
             this.mapper = mapper;
         }
 
         // Создание новой команды
-        public async Task<TeamEntity> CreateTeamAsync(
-            string name, 
-            string description, 
+        public async Task<GetTeamDto> CreateTeamAsync(
+            CreateTeamDto dto,
             Guid captainId, 
-            Guid HackathonId,
             CancellationToken token
             )
         {
             // Проверка, что у пользователя нет другой команды для этого 
-            await validation.CheckUserNotInAnyTeamForHackathonAsync(captainId, HackathonId, token);
+            await validation.CheckUserNotInAnyTeamForHackathonAsync(captainId, dto.HackathonId, token);
             // Создание команды
             var team = new TeamEntity
             {
+                
                 Id = Guid.NewGuid(),
-                Name = name,
-                Description = description,
+                HackathonId = dto.HackathonId,
+                Name = dto.Name,
+                Description = dto.Description,
                 CaptainId = captainId,
-                HackathonId = HackathonId,
                 TeamCreatedAt = DateTime.UtcNow
             };
             // Добавление капитана как участника команды
@@ -54,7 +56,8 @@ namespace MethodTeams.Services
             };
             team.Members.Add(member);
             await teamRepo.AddAsync(team, token);
-            return team;
+            await tagRepo.AddTeamTags(team.Id, dto.Tags, token);
+            return mapper.Map<GetTeamDto>(team);
         }
 
         // Удаление команды (только капитаном или администратором)
@@ -68,6 +71,26 @@ namespace MethodTeams.Services
             await validation.CheckTeamExistsAsync(teamId, token);
             await validation.CheckUserIsCaptainOrAdminAsync(teamId, requestingUserId, isAdmin, token);
             await teamRepo.RemoveTeamAsync(teamId, token);
+        }
+
+        public async Task UpdateTeamAsync(
+            UpdateTeamDto team,
+            Guid requestingUserId,
+            CancellationToken token,
+            bool isAdmin = false
+            )
+        {
+            await validation.CheckTeamExistsAsync(team.Id, token);
+            await validation.CheckUserIsCaptainOrAdminAsync(team.Id, requestingUserId, isAdmin, token);
+            var teamEntity = await teamRepo.GetByIdAsync(team.Id, token);
+            if (string.IsNullOrEmpty(team.Description) && teamEntity.Description != team.Description)
+                teamEntity.Description = team.Description;
+            if (string.IsNullOrEmpty(team.Name) && teamEntity.Name != team.Name)
+                teamEntity.Name = team.Name;
+            if (team.HackathonId != null && teamEntity.HackathonId != team.HackathonId) 
+                teamEntity.HackathonId = (Guid)team.HackathonId;
+            await teamRepo.UpdateTeamAsync(teamEntity, token);
+            
         }
 
         // Добавление пользователя в команду
@@ -102,6 +125,34 @@ namespace MethodTeams.Services
             await validation.CheckUserInTeamAsync(userId, teamId, token);
             await teamRepo.RemoveMemberAsync(userId, teamId, token);
         }
+
+        // Добавление пользователя в команду
+        public async Task JoinUserToTeamAsync(
+            Guid teamId,
+            Guid userId,
+            CancellationToken token
+            )
+        {
+            await validation.CheckTeamExistsAsync(teamId, token);
+            Guid hackathonId = (Guid)await teamRepo.GetHackathonIdAsync(teamId, token);
+            await validation.CheckUserNotInTeamAsync(userId, teamId, token);
+            await validation.CheckUserNotInAnyTeamForHackathonAsync(userId, hackathonId, token);
+            await teamRepo.AddMemberAsync(userId, teamId, token);
+        }
+
+        // Удаление пользователя из команды
+        public async Task LeaveUserFromTeamAsync(
+            Guid teamId,
+            Guid userId,
+            CancellationToken token
+            )
+        {
+            await validation.CheckTeamExistsAsync(teamId, token);
+            // Нельзя удалить капитана
+            await validation.CheckCaptainKick(teamId, userId, token);
+            await validation.CheckUserInTeamAsync(userId, teamId, token);
+            await teamRepo.RemoveMemberAsync(userId, teamId, token);
+        }
         // Передача прав капитана
         public async Task TransferCaptainRightsAsync(
             Guid teamId, 
@@ -116,24 +167,35 @@ namespace MethodTeams.Services
             await teamRepo.TransferCaptainAsync(newCaptainId, teamId, token);
         }
         // Получение информации о команде по ID
-        public async Task<TeamEntity> GetTeamByIdAsync(Guid teamId, CancellationToken token)
+        public async Task<GetTeamDto> GetTeamByIdAsync(Guid teamId, CancellationToken token)
         {
             await validation.CheckTeamExistsAsync(teamId, token);
-            return await teamRepo.GetByIdAsync(teamId, token);
+            var team = await teamRepo.GetTeamAsync(teamId, token);
+            return mapper.Map<GetTeamDto>(team);
         }
         // Получение списка участников команды
-        public async Task<List<Guid>> GetTeamMembersAsync(Guid teamId, CancellationToken token)
+        public async Task<List<string>> GetTeamMembersAsync(Guid teamId, CancellationToken token)
         {
             await validation.CheckTeamExistsAsync(teamId, token);
             return await teamRepo.GetTeamMembersAsync(teamId, token);
         }
 
-        // Получение списка команд
-        public async Task<List<TeamInfoDto>> GetTeamAllAsync(CancellationToken token)
+        // Получение команды пользователя для конкретного события
+        public async Task<List<GetTeamDto>> GetTeamForHackathonAsync(Guid hackathonId, CancellationToken token)
         {
-            
-            var teams = await teamRepo.GetAllAsync(token);
-            return mapper.Map<List<TeamInfoDto>>(teams);
+            var teams =  await teamRepo.GetTeamByHackathonAsync(hackathonId, token);
+            if (teams is null) return [];
+            return mapper.ProjectTo<GetTeamDto>(teams.AsQueryable()).ToList();
+        }
+
+        // Получение списка команд
+        public async Task<List<GetTeamDto>> GetTeamAllAsync(CancellationToken token)
+        {
+
+            var teams = await teamRepo.GetTeamsAllAsync(token);
+            if (teams is null) return [];
+            //return mapper.Map<List<TeamInfoDto>>(teams);
+            return mapper.ProjectTo<GetTeamDto>(teams.AsQueryable()).ToList();
         }
 
         //// Проверка, является ли пользователь капитаном команды

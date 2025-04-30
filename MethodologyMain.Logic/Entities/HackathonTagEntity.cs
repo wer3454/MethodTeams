@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace MethodologyMain.Logic.Entities
 {
-    [Table("hackthonTag")]
+    [Table("hackathonTag", Schema = "mainSchema")]
     public class HackathonTagEntity
     {
         [Column("hackathonId")]

@@ -24,5 +24,7 @@ namespace MethodologyMain.Logic.Entities
         public List<UserTagEntity> Users { get; set; } = new List<UserTagEntity>();
 
         public List<HackathonTagEntity> Hacksthons { get; set; } = new List<HackathonTagEntity>();
+
+        public List<TeamTagEntity> Teams { get; set; } = new List<TeamTagEntity>();
     }
 }

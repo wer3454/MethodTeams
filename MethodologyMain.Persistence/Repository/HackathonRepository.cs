@@ -3,6 +3,7 @@ using MethodologyMain.Persistence.Interfaces;
 using MethodTeams.Data;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
+using System.Threading;
 
 namespace MethodologyMain.Persistence.Repository
 {
@@ -13,30 +14,46 @@ namespace MethodologyMain.Persistence.Repository
         {
             this.context = context;
         }
-        public async Task<List<HackathonEntity>> GetAllCurrentHackathonsAsync(int page = 1, int pageSize = 10)
+        public async Task<List<HackathonEntity>> GetAllCurrentHackathonsAsync(
+            int page = 1, 
+            int pageSize = 10,
+            CancellationToken token = default
+            )
         {
             return await context.Hackathons
                 .AsNoTracking()
-                .Where(h => h.EndDate > DateTime.UtcNow)
+                .Where(h => h.EndDate > DateOnly.FromDateTime(DateTime.Now))
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)                                
-                .ToListAsync();
+                .ToListAsync(token);
         }
 
-        public async Task<HackathonEntity?> GetByIdAsync(Guid id)
+        public async Task<HackathonEntity?> GetByIdAsync(Guid id, CancellationToken token = default)
         {
-            return await context.Hackathons.FindAsync(id);
+            return await context.Hackathons.FindAsync([id], token);
         }
-
-        public async Task<List<HackathonEntity>> GetAllHackathonsAsync(int page = 1, int pageSize = 10)
+        public async Task<List<HackathonEntity>> GetAllHackathonsAsync(CancellationToken token = default)
+        {
+            return await context.Hackathons.AsNoTracking().ToListAsync(token);
+        }
+        public async Task<List<HackathonEntity>> GetAllHackathonsPagedAsync(
+            int page = 1, 
+            int pageSize = 10, 
+            CancellationToken token = default
+            )
         {
             return await context.Hackathons.AsNoTracking()
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
-                .ToListAsync();
+                .ToListAsync(token);
         }
 
-        public async Task<List<HackathonEntity>> GetHackathonsByFlexibleSearchAsync(int page,int pageSize, Expression<Func<HackathonEntity, bool>> filter = null)
+        public async Task<List<HackathonEntity>> GetHackathonsByFlexibleSearchAsync(
+            int page,
+            int pageSize, 
+            Expression<Func<HackathonEntity, bool>> filter = null,
+            CancellationToken token = default
+            )
         {
             var query = context.Hackathons.AsQueryable();
 
@@ -47,7 +64,7 @@ namespace MethodologyMain.Persistence.Repository
             return await query
                     .Skip((page - 1) * pageSize)
                     .Take(pageSize)
-                    .ToListAsync();
+                    .ToListAsync(token);
         }
     }
 }

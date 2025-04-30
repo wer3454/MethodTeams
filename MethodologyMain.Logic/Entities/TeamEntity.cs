@@ -14,18 +14,22 @@ namespace MethodologyMain.Logic.Entities
         public required Guid HackathonId { get; set; }
 
         [Column("name")]
-        public required string Name { get; set; } = string.Empty;
+        public required string Name { get; set; }
 
         [Column("description")]
         public string Description { get; set; } = string.Empty;
 
         [Column("captainId")]
         public required Guid CaptainId { get; set; }
+        
+        [Column("maxMembers")]
+        public int MaxMembers { get; set; }
 
         [Column("teamCreatedAt")]
-        public DateTime TeamCreatedAt { get; set; }
+        public DateTime TeamCreatedAt { get; set; } = DateTime.UtcNow;
 
         // Навигационное свойство для связи с участниками
+        public List<TeamTagEntity> Tags { get; set; } = new List<TeamTagEntity>();
         public List<UserTeamEntity> Members { get; set; } = new List<UserTeamEntity>();
         public HackathonEntity Hackathon { get; set; } = null!;
     }
