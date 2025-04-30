@@ -5,6 +5,7 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace MethodologyMain.Logic.Entities
@@ -47,10 +48,28 @@ namespace MethodologyMain.Logic.Entities
         public string Website { get; set; } = string.Empty;
 
         [Column("prize")]
-        public required string Prizes { get; set; }
+        public string PrizesJson { get; set; }
 
         [Column("schedule")]
-        public required string Schedule { get; set; }
+        public string ScheduleJson { get; set; }
+
+        [NotMapped]
+        public required List<Prize> Prizes
+        {
+            get => string.IsNullOrEmpty(PrizesJson)
+                ? new List<Prize>()
+                : JsonSerializer.Deserialize<List<Prize>>(PrizesJson);
+            set => PrizesJson = JsonSerializer.Serialize(value);
+        }
+
+        [NotMapped]
+        public required List<ScheduleItem> Schedule
+        {
+            get => string.IsNullOrEmpty(ScheduleJson)
+                ? new List<ScheduleItem>()
+                : JsonSerializer.Deserialize<List<ScheduleItem>>(ScheduleJson);
+            set => ScheduleJson = JsonSerializer.Serialize(value);
+        }
 
         public OrganizationEntity Organization { get; set; } = null!;
 

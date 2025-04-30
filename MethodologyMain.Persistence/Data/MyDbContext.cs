@@ -26,6 +26,13 @@ namespace MethodTeams.Data
             modelBuilder.Entity<UserTeamEntity>()
                 .HasKey(e => new {e.UserId, e.TeamId});
 
+            modelBuilder.Entity<HackathonEntity>()
+                .Property(h => h.PrizesJson)
+                .HasColumnType("jsonb");
+
+            modelBuilder.Entity<HackathonEntity>()
+                .Property(h => h.ScheduleJson)
+                .HasColumnType("jsonb");
             // Настройка связей между таблицами
             modelBuilder.Entity<HackathonTagEntity>()
                 .HasOne<TagEntity>(e => e.Tag)
