@@ -28,7 +28,7 @@ namespace MethodologyMain.API.Controllers
             {
                 ServiceName = "Main service",
                 LogLevel = LogEventLevel.Information,
-                Message = "POST api/Team/dummy-data was called",
+                Message = "POST api/main/Team/dummy-data was called",
                 TimeStamp = DateTime.UtcNow
             }, cancellationToken);
             string data = "Dataaa";
@@ -43,7 +43,7 @@ namespace MethodologyMain.API.Controllers
             {
                 ServiceName = "Main service",
                 LogLevel = LogEventLevel.Information,
-                Message = "GET api/Team was called",
+                Message = "GET api/main/Team was called",
                 TimeStamp = DateTime.UtcNow
             }, token);
             var teams = await teamService.GetTeamAllAsync(token);
@@ -58,7 +58,7 @@ namespace MethodologyMain.API.Controllers
             {
                 ServiceName = "Main service",
                 LogLevel = LogEventLevel.Information,
-                Message = "GET api/Team/hackathon/id was called",
+                Message = "GET api/main/Team/hackathon/id was called",
                 TimeStamp = DateTime.UtcNow
             }, token);
             var teams = await teamService.GetTeamForHackathonAsync(hackId, token);
@@ -74,7 +74,7 @@ namespace MethodologyMain.API.Controllers
             {
                 ServiceName = "Main service",
                 LogLevel = LogEventLevel.Information,
-                Message = "POST api/Team was called",
+                Message = "POST api/main/Team was called",
                 TimeStamp = DateTime.UtcNow
             }, token);
             // Получение ID текущего пользователя из токена
@@ -90,7 +90,7 @@ namespace MethodologyMain.API.Controllers
             {
                 ServiceName = "Main service",
                 LogLevel = LogEventLevel.Information,
-                Message = "GET api/Team/id was called",
+                Message = "GET api/main/Team/id was called",
                 TimeStamp = DateTime.UtcNow
             }, token);
             var team = await teamService.GetTeamByIdAsync(id, token);
@@ -106,7 +106,7 @@ namespace MethodologyMain.API.Controllers
             {
                 ServiceName = "Main service",
                 LogLevel = LogEventLevel.Information,
-                Message = "POST api/Team/id/users/userId was called",
+                Message = "POST api/main/Team/id/users/userId was called",
                 TimeStamp = DateTime.UtcNow
             }, token);
             await teamService.JoinUserToTeamAsync(id, userId, token);
@@ -122,7 +122,7 @@ namespace MethodologyMain.API.Controllers
             {
                 ServiceName = "Main service",
                 LogLevel = LogEventLevel.Information,
-                Message = "DELETE api/Team/id/users/userId was called",
+                Message = "DELETE api/main/Team/id/users/userId was called",
                 TimeStamp = DateTime.UtcNow
             }, token);
             await teamService.LeaveUserFromTeamAsync(id, userId, token);
