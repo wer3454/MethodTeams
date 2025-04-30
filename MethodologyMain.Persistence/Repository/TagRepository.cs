@@ -24,7 +24,7 @@ namespace MethodologyMain.Persistence.Repository
         public async Task AddTeamTags(Guid teamId, List<string> tagNames, CancellationToken token)
         {
             token.ThrowIfCancellationRequested();
-            var team = await teamRepo.GetByIdAsync(teamId, token);
+            var team = await teamRepo.GetTeamAsync(teamId, token);
             var existTags = await _context.Tags
                 .Where(m => m.TagClassName == "team")
                 .Where(m => tagNames.Contains(m.TagName))
@@ -52,6 +52,7 @@ namespace MethodologyMain.Persistence.Repository
                     // Создаем новый тег
                     var newTag = new TagEntity
                     {
+                        Id = Guid.NewGuid(),
                         TagName = tagName,
                         TagClassName = "team"
                     };
@@ -62,7 +63,7 @@ namespace MethodologyMain.Persistence.Repository
                     team.Tags.Add(new TeamTagEntity
                     {
                         TeamId = teamId,
-                        Tag = newTag
+                        TagId = newTag.Id
                     });
                 }
 
@@ -80,7 +81,7 @@ namespace MethodologyMain.Persistence.Repository
         public async Task AddUserTags(Guid userId, List<string> tagNames, CancellationToken token)
         {
             token.ThrowIfCancellationRequested();
-            var user = await userRepo.GetByIdAsync(userId, token);
+            var user = await userRepo.GetUserByIdAsync(userId, token);
             var existTags = await _context.Tags
                 .Where(m => m.TagClassName == "user")
                 .Where(m => tagNames.Contains(m.TagName))
@@ -107,6 +108,7 @@ namespace MethodologyMain.Persistence.Repository
                     // Создаем новый тег
                     var newTag = new TagEntity
                     {
+                        Id = Guid.NewGuid(),
                         TagName = tagName,
                         TagClassName = "user"
                     };
@@ -116,8 +118,9 @@ namespace MethodologyMain.Persistence.Repository
                     // (ID тега будет установлен после сохранения)
                     user.Tags.Add(new UserTagEntity
                     {
+
                         UserId = userId,
-                        Tag = newTag
+                        TagId = newTag.Id
                     });
                 }
 
@@ -131,7 +134,78 @@ namespace MethodologyMain.Persistence.Repository
             // Сохраняем изменения
             await _context.SaveChangesAsync(token);
         }
+        public async Task UpdateUserTags(Guid userId, List<string> tagNames, CancellationToken token)
+        {
+            token.ThrowIfCancellationRequested();
+            var user = await userRepo.GetUserByIdAsync(userId, token);
+            _context.Entry<UserMainEntity>(user).State = EntityState.Detached;
+            var existTags = await _context.Tags
+                .Where(m => m.TagClassName == "user")
+                .Where(m => tagNames.Contains(m.TagName))
+                .ToDictionaryAsync(m => m.TagName, t => t, cancellationToken: token);
+            var newTagsToAdd = new List<TagEntity>();
+            var userTags = user.Tags
+                .Where(m => m.UserId == userId)
+                .Select(t => t.Tag.TagName)
+                .ToList();
+            var userTagsToDelete = user.Tags
+                .Where(m => m.UserId == userId)
+                .ToDictionary(t => t.Tag, m => m);
+            var userDeleteTags = userTagsToDelete.Keys.Except(existTags.Values).ToList();
+            foreach (var tagName in tagNames)
+            {
+                if (!userTags.Contains(tagName))
+                {
+                    // Если тег уже существует, используем его
+                    if (existTags.TryGetValue(tagName, out var existTag))
+                    {
+                        // Проверяем, что связь еще не существует
+                        if (!user.Tags.Any(t => t.TagId == existTag.Id))
+                        {
+                            user.Tags.Add(new UserTagEntity
+                            {
+                                UserId = userId,
+                                TagId = existTag.Id
+                            });
+                        }
+                    }
+                    else
+                    {
+                        // Создаем новый тег
+                        var newTag = new TagEntity
+                        {
+                            Id = Guid.NewGuid(),
+                            TagName = tagName,
+                            TagClassName = "user"
+                        };
+                        newTagsToAdd.Add(newTag);
 
+                        // Добавляем связь с новым тегом
+                        // (ID тега будет установлен после сохранения)
+                        user.Tags.Add(new UserTagEntity
+                        {
+                            UserId = userId,
+                            TagId = newTag.Id
+                        });
+                    }
+                }
+            }
+            // Добавляем новые теги в контекст
+            if (newTagsToAdd.Count != 0)
+            {
+                await _context.Tags.AddRangeAsync(newTagsToAdd, token);
+            }
+            if (userDeleteTags.Count != 0)
+            {
+                foreach (var deleteTag in userDeleteTags)
+                {
+                    if (userTagsToDelete.TryGetValue(deleteTag, out var tag)) user.Tags.Remove(tag);
+                }
+            }
+
+            // Сохраняем изменения
+            await _context.SaveChangesAsync(token);
+        }
         public async Task AddHackTags(Guid hackId, List<string> tagNames, CancellationToken token)
         {
             token.ThrowIfCancellationRequested();
@@ -162,6 +236,7 @@ namespace MethodologyMain.Persistence.Repository
                     // Создаем новый тег
                     var newTag = new TagEntity
                     {
+                        Id = Guid.NewGuid(),
                         TagName = tagName,
                         TagClassName = "hack"
                     };
@@ -172,7 +247,7 @@ namespace MethodologyMain.Persistence.Repository
                     hack.Tags.Add(new HackathonTagEntity
                     {
                         HackathonId = hackId,
-                        TagId = tag.Id
+                        TagId = newTag.Id
                     });
                 }
 
