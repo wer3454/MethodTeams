@@ -11,11 +11,19 @@ namespace MethodologyMain.Application.Services
 {
     public class HackathonService : IHackathonService
     {
-        private readonly IHackathonRepository hackathonRepository;
+        private readonly IHackathonRepository hackRepo;
+        private readonly ITagRepository tagRepo;
+        private readonly IOrganizationRepository orgRepo;
         private readonly IMapper mapper;
-        public HackathonService(IHackathonRepository hackathonRepository, IMapper mapper)
+        public HackathonService(
+            IHackathonRepository hackRepo,
+            ITagRepository tagRepo,
+            IOrganizationRepository orgRepo,
+            IMapper mapper)
         {
-            this.hackathonRepository = hackathonRepository;
+            this.hackRepo = hackRepo;
+            this.tagRepo = tagRepo;
+            this.orgRepo = orgRepo;
             this.mapper = mapper;
         }
         public async Task<List<Hackathon>> GetHackathonsByFlexibleSearchAsync(HackathonFilterDto filterDto)
@@ -38,9 +46,47 @@ namespace MethodologyMain.Application.Services
                 predicate = predicate.And(h => h.MinTeamSize >= filterDto.MinTeamSize
                     && h.MaxTeamSize <= filterDto.MaxTeamSize);
 
-            var hackEntities = await hackathonRepository.GetHackathonsByFlexibleSearchAsync(filterDto.Page,filterDto.PageSize ,predicate);
+            var hackEntities = await hackRepo.GetHackathonsByFlexibleSearchAsync(filterDto.Page,filterDto.PageSize ,predicate);
 
             return mapper.Map<List<Hackathon>>(hackEntities);
+        }
+
+        public async Task<GetHackathonDto> CreateHackAsync(CreateHackathonDto dto, CancellationToken token)
+        {
+            var hack = new HackathonEntity
+            {
+                Id = Guid.NewGuid(),
+                OrganizationId = dto.OrganizationId,
+                Name = dto.Name,
+                Description = dto.Description,
+                StartDate = dto.StartDate,
+                EndDate = dto.EndDate,
+                ImageUrl = dto.ImageUrl,
+                MaxTeamSize = dto.TeamSize.Max,
+                MinTeamSize = dto.TeamSize.Min,
+                Prizes = dto.Prizes,
+                Schedule = dto.Schedule,
+                Location = dto.Location,
+                Website = dto.Website,
+            };
+            await hackRepo.AddAsync(hack, token);
+            await tagRepo.AddHackTags(hack.Id, dto.Tags, token);
+            return mapper.Map<GetHackathonDto>(hack);
+        }
+
+        // Получение информации о хакатоне по ID
+        public async Task<GetHackathonDto> GetHackByIdAsync(Guid hackId, CancellationToken token)
+        {
+            // await validation.CheckTeamExistsAsync(teamId, token);
+            var hack = await hackRepo.GetByIdAsync(hackId, token);
+            return mapper.Map<GetHackathonDto>(hack);
+        }
+
+        // Получение списка хакатонов
+        public async Task<List<GetHackathonDto>> GetHacksAllAsync(CancellationToken token)
+        {
+            var hacks = await hackRepo.GetAllHackathonsAsync(token);
+            return mapper.Map<List<GetHackathonDto>>(hacks);
         }
     }
 }

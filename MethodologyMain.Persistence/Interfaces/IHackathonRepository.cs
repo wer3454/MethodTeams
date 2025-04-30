@@ -3,7 +3,7 @@ using System.Linq.Expressions;
 
 namespace MethodologyMain.Persistence.Interfaces
 {
-    public interface IHackathonRepository
+    public interface IHackathonRepository : IGenericRepository<HackathonEntity>
     {
         Task<HackathonEntity?> GetByIdAsync(Guid id, CancellationToken token = default);
         Task<List<HackathonEntity>> GetAllCurrentHackathonsAsync(int page = 1, int pageSize = 10, CancellationToken token = default);

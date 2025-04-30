@@ -22,6 +22,7 @@ using MethodologyMain.Infrastructure.Listeners;
 using MethodologyMain.Application.DTO;
 using MethodologyMain.Logic.Entities;
 using Serilog;
+using MethodologyMain.Logic.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -53,6 +54,11 @@ var configuration = new MapperConfiguration(static cfg =>
     .ForMember(dto => dto.Tags, conf => conf.MapFrom(t => t.Tags.Select(s => s.Tag.TagName).ToList()))
     .ForMember(dto => dto.Name, conf => conf.MapFrom(t => t.UserName))
     .ForMember(dto => dto.Bio, conf => conf.MapFrom(t => t.Education));
+    cfg.CreateMap<HackathonEntity, GetHackathonDto>()
+    .ForMember(dto => dto.Tags, conf => conf.MapFrom(t => t.Tags.Select(s => s.Tag.TagName).ToList()))
+    .ForMember(dto => dto.TeamSize, conf => conf.MapFrom(t => new TeamSize { Max = t.MaxTeamSize, Min = t.MinTeamSize }))
+    .ForMember(dto => dto.OrganizerLogo, conf => conf.MapFrom(t => t.Organization.Logo))
+    .ForMember(dto => dto.OrganizerName, conf => conf.MapFrom(t => t.Organization.Name));
 
     cfg.AllowNullCollections = true;
     cfg.AddGlobalIgnore("Item");
@@ -69,10 +75,12 @@ builder.Services.AddApiAuthentication(builder.Services.BuildServiceProvider().Ge
 
 builder.Services.AddScoped<ITeamService, TeamService>();
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IHackathonService, HackathonService>();
 builder.Services.AddAutoMapper(typeof(TeamProfile).Assembly, typeof(TeamInfoDto).Assembly);
 builder.Services.AddScoped<ITagRepository, TagRepository>();
 builder.Services.AddScoped<ITeamRepository, TeamRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IOrganizationRepository, OrganizationRepository>();
 builder.Services.AddScoped<IHackathonRepository, HackathonRepository>();
 builder.Services.AddScoped<ITeamValidationService, TeamValidationService>();
 builder.Services.AddSingleton<IRabbitMqPublisherBase<RabbitMqLogPublish>, LogQueueService>();
