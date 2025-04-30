@@ -21,8 +21,16 @@ using RabbitMqListener.Interfaces;
 using MethodologyMain.Infrastructure.Listeners;
 using MethodologyMain.Application.DTO;
 using MethodologyMain.Logic.Entities;
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
+
+var logger = new LoggerConfiguration()
+    .WriteTo.Console()
+    .CreateLogger();
+
+builder.Logging.ClearProviders();
+builder.Logging.AddSerilog(logger);
 
 builder.Services.AddControllers();
 builder.Services.AddControllers()
@@ -85,6 +93,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.UseCors("AllowFrontend");
 app.UseAuthorization();
 app.UseAuthentication();
 
