@@ -38,6 +38,22 @@ namespace MethodologyMain.Persistence.Repository
             _context.Update(user);
             await SaveChangesAsync(token);
         }
+        public async Task<List<UserMainEntity>> GetUsersAllAsync(CancellationToken token)
+        {
+            CheckCancellation(token);
+            return await _context.Users
+                .Include(m => m.Tags)
+                    .ThenInclude(i => i.Tag)
+                .ToListAsync(token);
+        }
+        public async Task<UserMainEntity> GetUserByIdAsync(Guid userId,CancellationToken token)
+        {
+            CheckCancellation(token);
+            return await _context.Users
+                .Include(m => m.Tags)
+                    .ThenInclude(i => i.Tag)
+                .FirstOrDefaultAsync(m => m.Id == userId);
+        }
         private static void CheckCancellation(CancellationToken token)
         {
             token.ThrowIfCancellationRequested();
