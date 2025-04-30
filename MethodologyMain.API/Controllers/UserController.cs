@@ -67,7 +67,7 @@ namespace MethodologyMain.API.Controllers
         }
 
         [HttpPut]
-        public async Task<ActionResult> UpdateUser([FromBody] GetUserDto dto, CancellationToken token)
+        public async Task<ActionResult<GetUserDto>> UpdateUser([FromBody] GetUserDto dto, CancellationToken token)
         {
             _ = logPublishService.SendEventAsync(new RabbitMqLogPublish
             {
@@ -76,9 +76,9 @@ namespace MethodologyMain.API.Controllers
                 Message = "PUT api/User was called",
                 TimeStamp = DateTime.UtcNow
             });
-            await userService.UpdateUserAsync(dto, token);
+            var user = await userService.UpdateUserAsync(dto, token);
             //var team = await teamService.CreateTeamAsync(dto.Name, dto.Description, currentUserId, dto.EventId, token);
-            return Ok();
+            return Ok(user);
         }
     }
 }
