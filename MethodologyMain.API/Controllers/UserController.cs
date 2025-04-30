@@ -26,7 +26,7 @@ namespace MethodologyMain.API.Controllers
             {
                 ServiceName = "Main service",
                 LogLevel = LogEventLevel.Information,
-                Message = "GET api/User was called",
+                Message = "GET api/main/User was called",
                 TimeStamp = DateTime.UtcNow
             });
             var users = await userService.GetUsersAllAsync(token);
@@ -35,13 +35,13 @@ namespace MethodologyMain.API.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<List<GetUserDto>>> GetUsersById(Guid id, CancellationToken token)
+        public async Task<ActionResult<GetUserDto>> GetUsersById([FromRoute] Guid id, CancellationToken token)
         {
             _ = logPublishService.SendEventAsync(new RabbitMqLogPublish
             {
                 ServiceName = "Main service",
                 LogLevel = LogEventLevel.Information,
-                Message = "GET api/User was called",
+                Message = "GET api/main/User was called",
                 TimeStamp = DateTime.UtcNow
             });
             var user = await userService.GetUserByIdAsync(id, token);
@@ -55,7 +55,7 @@ namespace MethodologyMain.API.Controllers
             {
                 ServiceName = "Main service",
                 LogLevel = LogEventLevel.Information,
-                Message = "POST api/User was called",
+                Message = "POST api/main/User was called",
                 TimeStamp = DateTime.UtcNow
             });
             var user = await userService.CreateUserAsync(dto, token);
@@ -70,7 +70,7 @@ namespace MethodologyMain.API.Controllers
             {
                 ServiceName = "Main service",
                 LogLevel = LogEventLevel.Information,
-                Message = "PUT api/User was called",
+                Message = "PUT api/main/User was called",
                 TimeStamp = DateTime.UtcNow
             });
             await userService.UpdateUserAsync(dto, token);
