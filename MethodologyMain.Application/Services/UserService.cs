@@ -9,18 +9,35 @@ namespace MethodologyMain.Application.Services
     public class UserService : IUserService
     {
         private readonly IUserRepository userRepo;
+        private readonly ITagRepository tagRepo;
         private readonly IMapper mapper;
-        public UserService(IUserRepository userRepo, IMapper mapper)
+        public UserService(IUserRepository userRepo, ITagRepository tagRepo, IMapper mapper)
         {
             this.userRepo = userRepo;
+            this.tagRepo = tagRepo;
             this.mapper = mapper;
         }
 
         // Создание нового пользователя
         public async Task<GetUserDto> CreateUserAsync(GetUserDto dto, CancellationToken token)
         {
-            var user = mapper.Map<UserMainEntity>(dto);
+            //var user = mapper.Map<UserMainEntity>(dto);
+            var user = new UserMainEntity 
+            { 
+                Id = Guid.NewGuid(),
+                UserName = dto.Name,
+                Email = dto.Email,
+                Education = dto.Bio,
+                PhotoUrl = dto.PhotoUrl,
+                CreatedAt = DateTime.UtcNow,
+                Location = dto.Location,
+                Github = dto.Github,
+                Website = dto.Website,
+                Skills = dto.Skills
+            };
+
             await userRepo.AddAsync(user, token);
+            await tagRepo.AddUserTags(user.Id, dto.Tags, token);
             return dto;
         }
         public async Task DeleteUserAsync(Guid userId, CancellationToken token)
@@ -32,7 +49,21 @@ namespace MethodologyMain.Application.Services
         }
         public async Task UpdateUserAsync(GetUserDto dto, CancellationToken token)
         {
-            var user = mapper.Map<UserMainEntity>(dto);
+            //var user = mapper.Map<UserMainEntity>(dto);
+            var user = new UserMainEntity
+            {
+                Id = dto.Id,
+                UserName = dto.Name,
+                Email = dto.Email,
+                Education = dto.Bio,
+                PhotoUrl = dto.PhotoUrl,
+                CreatedAt = DateTime.UtcNow,
+                Location = dto.Location,
+                Github = dto.Github,
+                Website = dto.Website,
+                Skills = dto.Skills
+            };
+            await tagRepo.UpdateUserTags(user.Id, dto.Tags, token);
             await userRepo.UpdateAsync(user, token);
             // await validation.CheckTeamExistsAsync(teamId, token);
             // await validation.CheckUserIsCaptainOrAdminAsync(teamId, requestingUserId, isAdmin, token);
@@ -43,7 +74,7 @@ namespace MethodologyMain.Application.Services
         public async Task<GetUserDto> GetUserByIdAsync(Guid userId, CancellationToken token)
         {
             // await validation.CheckTeamExistsAsync(teamId, token);
-            var user = await userRepo.GetByIdAsync(userId, token);
+            var user = await userRepo.GetUserByIdAsync(userId, token);
             return mapper.Map<GetUserDto>(user);
         }
 
@@ -51,7 +82,7 @@ namespace MethodologyMain.Application.Services
         public async Task<List<GetUserDto>> GetUsersAllAsync(CancellationToken token)
         {
 
-            var users = await userRepo.GetAllAsync(token);
+            var users = await userRepo.GetUsersAllAsync(token);
             return mapper.Map<List<GetUserDto>>(users);
         }
     }

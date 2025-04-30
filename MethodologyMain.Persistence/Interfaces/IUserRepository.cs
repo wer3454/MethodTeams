@@ -12,6 +12,8 @@ namespace MethodologyMain.Persistence.Interfaces
         Task<bool> CheckUserTeamInHackAsync(Guid userId, Guid hackathonId, CancellationToken token);
         Task UpdateAsync(UserMainEntity user, CancellationToken token);
         Task RemoveAsync(Guid userId, CancellationToken token);
+        Task<UserMainEntity> GetUserByIdAsync(Guid userId, CancellationToken token);
+        Task<List<UserMainEntity>> GetUsersAllAsync(CancellationToken token);
 
     }
 }
