@@ -21,7 +21,6 @@ namespace MethodologyMain.Application.Services
         // Создание нового пользователя
         public async Task<GetUserDto> CreateUserAsync(GetUserDto dto, CancellationToken token)
         {
-            //var user = mapper.Map<UserMainEntity>(dto);
             var user = new UserMainEntity 
             { 
                 Id = Guid.NewGuid(),
@@ -38,7 +37,7 @@ namespace MethodologyMain.Application.Services
 
             await userRepo.AddAsync(user, token);
             await tagRepo.AddUserTags(user.Id, dto.Tags, token);
-            return dto;
+            return mapper.Map<GetUserDto>(user);
         }
         public async Task DeleteUserAsync(Guid userId, CancellationToken token)
         {
@@ -47,9 +46,8 @@ namespace MethodologyMain.Application.Services
             // await validation.CheckUserIsCaptainOrAdminAsync(teamId, requestingUserId, isAdmin, token);
             // await userRepo.RemoveAsync(teamId, token);
         }
-        public async Task UpdateUserAsync(GetUserDto dto, CancellationToken token)
+        public async Task<GetUserDto> UpdateUserAsync(GetUserDto dto, CancellationToken token)
         {
-            //var user = mapper.Map<UserMainEntity>(dto);
             var user = new UserMainEntity
             {
                 Id = dto.Id,
@@ -65,6 +63,7 @@ namespace MethodologyMain.Application.Services
             };
             await tagRepo.UpdateUserTags(user.Id, dto.Tags, token);
             await userRepo.UpdateAsync(user, token);
+            return mapper.Map<GetUserDto>(user);
             // await validation.CheckTeamExistsAsync(teamId, token);
             // await validation.CheckUserIsCaptainOrAdminAsync(teamId, requestingUserId, isAdmin, token);
             // await userRepo.RemoveAsync(teamId, token);

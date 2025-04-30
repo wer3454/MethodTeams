@@ -9,6 +9,6 @@ namespace MethodologyMain.Application.Interface
         Task DeleteUserAsync(Guid userId, CancellationToken token);
         Task<GetUserDto> GetUserByIdAsync(Guid userId, CancellationToken token);
         Task<List<GetUserDto>> GetUsersAllAsync(CancellationToken token);
-        Task UpdateUserAsync(GetUserDto dto, CancellationToken token);
+        Task <GetUserDto> UpdateUserAsync(GetUserDto dto, CancellationToken token);
     }
 }

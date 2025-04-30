@@ -7,12 +7,10 @@ using System.Threading;
 
 namespace MethodologyMain.Persistence.Repository
 {
-    public class HackathonRepository : IHackathonRepository
+    public class HackathonRepository : GenericRepository<HackathonEntity>, IHackathonRepository
     {
-        private readonly MyDbContext context;
-        public HackathonRepository(MyDbContext context)
+        public HackathonRepository(MyDbContext context): base(context)
         {
-            this.context = context;
         }
         public async Task<List<HackathonEntity>> GetAllCurrentHackathonsAsync(
             int page = 1, 
@@ -20,7 +18,7 @@ namespace MethodologyMain.Persistence.Repository
             CancellationToken token = default
             )
         {
-            return await context.Hackathons
+            return await _context.Hackathons
                 .AsNoTracking()
                 .Where(h => h.EndDate > DateOnly.FromDateTime(DateTime.Now))
                 .Skip((page - 1) * pageSize)
@@ -30,11 +28,11 @@ namespace MethodologyMain.Persistence.Repository
 
         public async Task<HackathonEntity?> GetByIdAsync(Guid id, CancellationToken token = default)
         {
-            return await context.Hackathons.FindAsync([id], token);
+            return await _context.Hackathons.FindAsync([id], token);
         }
         public async Task<List<HackathonEntity>> GetAllHackathonsAsync(CancellationToken token = default)
         {
-            return await context.Hackathons.AsNoTracking().ToListAsync(token);
+            return await _context.Hackathons.AsNoTracking().ToListAsync(token);
         }
         public async Task<List<HackathonEntity>> GetAllHackathonsPagedAsync(
             int page = 1, 
@@ -42,7 +40,7 @@ namespace MethodologyMain.Persistence.Repository
             CancellationToken token = default
             )
         {
-            return await context.Hackathons.AsNoTracking()
+            return await _context.Hackathons.AsNoTracking()
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
                 .ToListAsync(token);
@@ -55,7 +53,7 @@ namespace MethodologyMain.Persistence.Repository
             CancellationToken token = default
             )
         {
-            var query = context.Hackathons.AsQueryable();
+            var query = _context.Hackathons.AsQueryable();
 
             if(filter is not null) 
                 query = query
