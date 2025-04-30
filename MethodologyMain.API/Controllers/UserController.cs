@@ -44,7 +44,7 @@ namespace MethodologyMain.API.Controllers
             {
                 ServiceName = "Main service",
                 LogLevel = LogEventLevel.Information,
-                Message = "GET api/User was called",
+                Message = "GET api/User/id was called",
                 TimeStamp = DateTime.UtcNow
             });
             var user = await userService.GetUserByIdAsync(id, token);
