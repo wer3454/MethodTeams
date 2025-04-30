@@ -6,9 +6,11 @@ using MethodologyMain.Application.Interface;
 using AuthMetodology.Infrastructure.Models;
 using Serilog.Events;
 using RabbitMqPublisher.Interface;
+using Microsoft.AspNetCore.Cors;
 namespace MethodologyMain.API.Controllers
 {
     [ApiController]
+    [EnableCors("AllowFrontend")]
     [Route("api/main/[controller]")]
     public class TeamController : ControllerBase
     {
