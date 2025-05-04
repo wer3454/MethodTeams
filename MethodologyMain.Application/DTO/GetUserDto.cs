@@ -14,6 +14,6 @@ namespace MethodologyMain.Application.DTO
         public string Location { get; set; } = string.Empty;
         public string Github { get; set; } = string.Empty;
         public string Website { get; set; } = string.Empty;
-        public string Skills { get; set; } = string.Empty;
+        public List<string> Skills { get; set; } = null!;
     }
 }

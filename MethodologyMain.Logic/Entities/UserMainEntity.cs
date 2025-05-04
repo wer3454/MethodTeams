@@ -1,5 +1,7 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using MethodologyMain.Logic.Models;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json;
 
 namespace MethodologyMain.Logic.Entities
 {
@@ -50,9 +52,16 @@ namespace MethodologyMain.Logic.Entities
         public string Website { get; set; } = string.Empty;
 
         [Column("skills")]
-        public string Skills { get; set; } = string.Empty;
+        public string SkillsJson { get; set; } = string.Empty;
 
-
+        [NotMapped]
+        public List<string> Skills
+        {
+            get => string.IsNullOrEmpty(SkillsJson)
+                ? new List<string>()
+                : JsonSerializer.Deserialize<List<string>>(SkillsJson);
+            set => SkillsJson = JsonSerializer.Serialize(value);
+        }
         public List<UserTeamEntity> Teams { get; set; } = new List<UserTeamEntity>();
 
         public List<UserTagEntity> Tags { get; set; } = new List<UserTagEntity>();
