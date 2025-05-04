@@ -11,7 +11,7 @@ using Serilog.Events;
 namespace MethodologyMain.API.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/main/[controller]")]
     public class HackathonController : Controller
     {
         private readonly IHackathonService hackService;
