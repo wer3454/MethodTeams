@@ -1,4 +1,5 @@
 ﻿using MethodologyMain.Logic.Entities;
+using MethodologyMain.Logic.Models;
 using MethodologyMain.Persistence.Interfaces;
 using MethodTeams.Data;
 using Microsoft.EntityFrameworkCore;
@@ -28,11 +29,11 @@ namespace MethodologyMain.Persistence.Repository
 
         public async Task<HackathonEntity?> GetByIdAsync(Guid id, CancellationToken token = default)
         {
-            return await _context.Hackathons.Include(m => m.Organization).FirstOrDefaultAsync(m => m.Id == id, token);
+            return await _context.Hackathons.Include(m => m.Organization).Include(m => m.Tags).FirstOrDefaultAsync(m => m.Id == id, token);
         }
         public async Task<List<HackathonEntity>> GetAllHackathonsAsync(CancellationToken token = default)
         {
-            return await _context.Hackathons.Include(m=>m.Organization).AsNoTracking().ToListAsync(token);
+            return await _context.Hackathons.Include(m=>m.Organization).Include(m => m.Tags).AsNoTracking().ToListAsync(token);
         }
         public async Task<List<HackathonEntity>> GetAllHackathonsPagedAsync(
             int page = 1, 
@@ -44,6 +45,39 @@ namespace MethodologyMain.Persistence.Repository
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
                 .ToListAsync(token);
+        }
+        public async Task<List<HackathonEntity>> GetHackathonsWithSearchAsync(SearchFilters filters, CancellationToken token)
+        {
+            var filteredHackathons = await _context.Hackathons.Include(m => m.Organization).Include(m => m.Tags).ThenInclude(m => m.Tag).AsNoTracking().ToListAsync(token);
+
+            // Apply search filters
+            if (!string.IsNullOrEmpty(filters.Query))
+            {
+                filteredHackathons = filteredHackathons.FindAll(h =>
+                    h.Name.Contains(filters.Query, StringComparison.OrdinalIgnoreCase) ||
+                    h.Description.Contains(filters.Query, StringComparison.OrdinalIgnoreCase));
+            }
+
+            if (filters.Tags != null && filters.Tags.Count > 0)
+            {
+                filteredHackathons = filteredHackathons.FindAll(h =>
+                    h.Tags.Any(t => filters.Tags.Contains(t.Tag.TagName)));
+            }
+
+            // Filter by tab
+            switch (filters.Tab)
+            {
+                case TabType.Upcoming:
+                    filteredHackathons = filteredHackathons.FindAll(h =>
+                        h.StartDate > DateOnly.FromDateTime(DateTime.Now));
+                    break;
+                case TabType.Past:
+                    filteredHackathons = filteredHackathons.FindAll(h =>
+                        h.EndDate < DateOnly.FromDateTime(DateTime.Now));
+                    break;
+            }
+
+            return filteredHackathons;
         }
 
         public async Task<List<HackathonEntity>> GetHackathonsByFlexibleSearchAsync(

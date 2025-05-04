@@ -48,6 +48,11 @@ namespace MethodologyMain.Application.Services
             return mapper.Map<List<Hackathon>>(hackEntities);
         }
 
+        public async Task<List<GetHackathonDto>> GetHackWithFilterAsync(SearchFilters filters, CancellationToken token)
+        {
+            var hacks = await hackRepo.GetHackathonsWithSearchAsync(filters, token);
+            return mapper.Map<List<GetHackathonDto>>(hacks);
+        }
         public async Task<GetHackathonDto> CreateHackAsync(CreateHackathonDto dto, CancellationToken token)
         {
             var hack = new HackathonEntity

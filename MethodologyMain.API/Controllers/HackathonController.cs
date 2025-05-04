@@ -22,8 +22,21 @@ namespace MethodologyMain.API.Controllers
             this.logPublishService = logPublishService;
         }
 
+        //[HttpGet]
+        //public async Task<ActionResult<List<GetHackathonDto>>> GetHackathons(CancellationToken token)
+        //{
+        //    _ = logPublishService.SendEventAsync(new RabbitMqLogPublish
+        //    {
+        //        ServiceName = "Main service",
+        //        LogLevel = LogEventLevel.Information,
+        //        Message = "GET api/Hackathon was called",
+        //        TimeStamp = DateTime.UtcNow
+        //    });
+        //    var hacks = await hackService.GetHacksAllAsync(token);
+        //    return Ok(hacks);
+        //}
         [HttpGet]
-        public async Task<ActionResult<List<GetHackathonDto>>> GetHackathons(CancellationToken token)
+        public async Task<ActionResult<List<GetHackathonDto>>> GetHackathonsWithFilter([FromQuery] SearchFilters filters, CancellationToken token)
         {
             _ = logPublishService.SendEventAsync(new RabbitMqLogPublish
             {
@@ -32,10 +45,9 @@ namespace MethodologyMain.API.Controllers
                 Message = "GET api/Hackathon was called",
                 TimeStamp = DateTime.UtcNow
             });
-            var hacks = await hackService.GetHacksAllAsync(token);
-            return Ok(hacks);
+            var hackathons = await hackService.GetHackWithFilterAsync(filters, token);
+            return Ok(hackathons);
         }
-
         [HttpGet("{id}")]
         public async Task<ActionResult<List<GetHackathonDto>>> GetUsersById(Guid id, CancellationToken token)
         {
