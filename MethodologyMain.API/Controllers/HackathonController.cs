@@ -2,6 +2,8 @@
 using MethodologyMain.Application.DTO;
 using MethodologyMain.Application.Interface;
 using MethodologyMain.Application.Services;
+using MethodologyMain.Logic.Models;
+using Microsoft.AspNetCore.Cors.Infrastructure;
 using Microsoft.AspNetCore.Mvc;
 using RabbitMqPublisher.Interface;
 using Serilog.Events;
@@ -46,6 +48,20 @@ namespace MethodologyMain.API.Controllers
             });
             var hack = await hackService.GetHackByIdAsync(id, token);
             return Ok(hack);
+        }
+
+        [HttpPost]
+        public async Task<ActionResult<CreateHackathonDto>> CreateUser([FromBody] CreateHackathonDto dto, CancellationToken token)
+        {
+            _ = logPublishService.SendEventAsync(new RabbitMqLogPublish
+            {
+                ServiceName = "Main service",
+                LogLevel = LogEventLevel.Information,
+                Message = "POST api/User was called",
+                TimeStamp = DateTime.UtcNow
+            });
+            var user = await hackService.CreateHackAsync(dto, token);
+            return Ok(user);
         }
     }
 }
