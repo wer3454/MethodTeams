@@ -13,17 +13,14 @@ namespace MethodologyMain.Application.Services
     {
         private readonly IHackathonRepository hackRepo;
         private readonly ITagRepository tagRepo;
-        private readonly IOrganizationRepository orgRepo;
         private readonly IMapper mapper;
         public HackathonService(
             IHackathonRepository hackRepo,
             ITagRepository tagRepo,
-            IOrganizationRepository orgRepo,
             IMapper mapper)
         {
             this.hackRepo = hackRepo;
             this.tagRepo = tagRepo;
-            this.orgRepo = orgRepo;
             this.mapper = mapper;
         }
         public async Task<List<Hackathon>> GetHackathonsByFlexibleSearchAsync(HackathonFilterDto filterDto)

@@ -28,11 +28,11 @@ namespace MethodologyMain.Persistence.Repository
 
         public async Task<HackathonEntity?> GetByIdAsync(Guid id, CancellationToken token = default)
         {
-            return await _context.Hackathons.FindAsync([id], token);
+            return await _context.Hackathons.Include(m => m.Organization).FirstOrDefaultAsync(m => m.Id == id, token);
         }
         public async Task<List<HackathonEntity>> GetAllHackathonsAsync(CancellationToken token = default)
         {
-            return await _context.Hackathons.AsNoTracking().ToListAsync(token);
+            return await _context.Hackathons.Include(m=>m.Organization).AsNoTracking().ToListAsync(token);
         }
         public async Task<List<HackathonEntity>> GetAllHackathonsPagedAsync(
             int page = 1, 
