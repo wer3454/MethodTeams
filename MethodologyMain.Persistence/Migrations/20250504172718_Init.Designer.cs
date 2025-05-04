@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace MethodologyMain.Persistence.Migrations
 {
     [DbContext(typeof(MyDbContext))]
-    [Migration("20250423104019_Init")]
+    [Migration("20250504172718_Init")]
     partial class Init
     {
         /// <inheritdoc />
@@ -32,14 +32,24 @@ namespace MethodologyMain.Persistence.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("id");
 
-                    b.Property<string>("AdditionalInfo")
+                    b.Property<string>("Description")
                         .IsRequired()
                         .HasColumnType("text")
-                        .HasColumnName("additionalInfo");
+                        .HasColumnName("description");
 
-                    b.Property<DateTime>("EndDate")
-                        .HasColumnType("timestamp with time zone")
+                    b.Property<DateOnly>("EndDate")
+                        .HasColumnType("date")
                         .HasColumnName("endDate");
+
+                    b.Property<string>("ImageUrl")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("imageUrl");
+
+                    b.Property<string>("Location")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("location");
 
                     b.Property<int>("MaxTeamSize")
                         .HasColumnType("integer")
@@ -58,13 +68,24 @@ namespace MethodologyMain.Persistence.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("organizationId");
 
-                    b.Property<decimal>("Prize")
-                        .HasColumnType("numeric")
+                    b.Property<string>("PrizesJson")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
                         .HasColumnName("prize");
 
-                    b.Property<DateTime>("StartDate")
-                        .HasColumnType("timestamp with time zone")
+                    b.Property<string>("ScheduleJson")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("schedule");
+
+                    b.Property<DateOnly>("StartDate")
+                        .HasColumnType("date")
                         .HasColumnName("startDate");
+
+                    b.Property<string>("Website")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("website");
 
                     b.HasKey("Id");
 
@@ -87,7 +108,7 @@ namespace MethodologyMain.Persistence.Migrations
 
                     b.HasIndex("HackathonId");
 
-                    b.ToTable("hackthonTag");
+                    b.ToTable("hackathonTag", "mainSchema");
                 });
 
             modelBuilder.Entity("MethodologyMain.Logic.Entities.OrganizationEntity", b =>
@@ -102,10 +123,10 @@ namespace MethodologyMain.Persistence.Migrations
                         .HasColumnType("text")
                         .HasColumnName("description");
 
-                    b.Property<string>("LinkToWebSite")
+                    b.Property<string>("Logo")
                         .IsRequired()
                         .HasColumnType("text")
-                        .HasColumnName("linkToWebsite");
+                        .HasColumnName("logo");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -159,6 +180,10 @@ namespace MethodologyMain.Persistence.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("hackathonId");
 
+                    b.Property<int>("MaxMembers")
+                        .HasColumnType("integer")
+                        .HasColumnName("maxMembers");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("text")
@@ -175,32 +200,21 @@ namespace MethodologyMain.Persistence.Migrations
                     b.ToTable("team", "mainSchema");
                 });
 
-            modelBuilder.Entity("MethodologyMain.Logic.Entities.TrackEntity", b =>
+            modelBuilder.Entity("MethodologyMain.Logic.Entities.TeamTagEntity", b =>
                 {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
+                    b.Property<Guid>("TagId")
                         .HasColumnType("uuid")
-                        .HasColumnName("id");
+                        .HasColumnName("tagId");
 
-                    b.Property<Guid>("HackathonId")
+                    b.Property<Guid>("TeamId")
                         .HasColumnType("uuid")
-                        .HasColumnName("hackathonId");
+                        .HasColumnName("teamId");
 
-                    b.Property<string>("TrackAdditionalInfo")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("trackAdditionalInfo");
+                    b.HasKey("TagId", "TeamId");
 
-                    b.Property<string>("TrackName")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("trackName");
+                    b.HasIndex("TeamId");
 
-                    b.HasKey("Id");
-
-                    b.HasIndex("HackathonId");
-
-                    b.ToTable("track", "mainSchema");
+                    b.ToTable("teamTag", "mainSchema");
                 });
 
             modelBuilder.Entity("MethodologyMain.Logic.Entities.UserMainEntity", b =>
@@ -214,35 +228,69 @@ namespace MethodologyMain.Persistence.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("birthDate");
 
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("createdAt");
+
                     b.Property<string>("Education")
                         .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("education");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("email");
 
                     b.Property<string>("FirstName")
                         .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("firstName");
 
+                    b.Property<string>("Github")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("github");
+
                     b.Property<string>("LastName")
                         .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("lastName");
 
-                    b.Property<string>("Surname")
+                    b.Property<string>("Location")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("location");
+
+                    b.Property<string>("MiddleName")
                         .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("middleName");
 
+                    b.Property<string>("PhotoUrl")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("photoUrl");
+
+                    b.Property<string>("SkillsJson")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("skills");
+
                     b.Property<string>("Telegram")
                         .IsRequired()
                         .HasColumnType("text")
-                        .HasColumnName("Telegram");
+                        .HasColumnName("telegram");
 
                     b.Property<string>("UserName")
                         .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("userName");
+
+                    b.Property<string>("Website")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("website");
 
                     b.HasKey("Id");
 
@@ -328,15 +376,23 @@ namespace MethodologyMain.Persistence.Migrations
                     b.Navigation("Hackathon");
                 });
 
-            modelBuilder.Entity("MethodologyMain.Logic.Entities.TrackEntity", b =>
+            modelBuilder.Entity("MethodologyMain.Logic.Entities.TeamTagEntity", b =>
                 {
-                    b.HasOne("MethodologyMain.Logic.Entities.HackathonEntity", "Hackathon")
-                        .WithMany("Tracks")
-                        .HasForeignKey("HackathonId")
+                    b.HasOne("MethodologyMain.Logic.Entities.TagEntity", "Tag")
+                        .WithMany("Teams")
+                        .HasForeignKey("TagId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Hackathon");
+                    b.HasOne("MethodologyMain.Logic.Entities.TeamEntity", "Team")
+                        .WithMany("Tags")
+                        .HasForeignKey("TeamId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Tag");
+
+                    b.Navigation("Team");
                 });
 
             modelBuilder.Entity("MethodologyMain.Logic.Entities.UserTagEntity", b =>
@@ -382,8 +438,6 @@ namespace MethodologyMain.Persistence.Migrations
                     b.Navigation("Tags");
 
                     b.Navigation("Teams");
-
-                    b.Navigation("Tracks");
                 });
 
             modelBuilder.Entity("MethodologyMain.Logic.Entities.OrganizationEntity", b =>
@@ -395,12 +449,16 @@ namespace MethodologyMain.Persistence.Migrations
                 {
                     b.Navigation("Hacksthons");
 
+                    b.Navigation("Teams");
+
                     b.Navigation("Users");
                 });
 
             modelBuilder.Entity("MethodologyMain.Logic.Entities.TeamEntity", b =>
                 {
                     b.Navigation("Members");
+
+                    b.Navigation("Tags");
                 });
 
             modelBuilder.Entity("MethodologyMain.Logic.Entities.UserMainEntity", b =>
