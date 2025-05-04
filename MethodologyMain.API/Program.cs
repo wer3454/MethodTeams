@@ -51,6 +51,7 @@ var configuration = new MapperConfiguration(static cfg =>
     .ForMember(dto => dto.TeamSize, conf => conf.MapFrom(t => new TeamSize { Max = t.MaxTeamSize, Min = t.MinTeamSize }))
     .ForMember(dto => dto.OrganizerLogo, conf => conf.MapFrom(t => t.Organization.Logo))
     .ForMember(dto => dto.OrganizerName, conf => conf.MapFrom(t => t.Organization.Name));
+    cfg.CreateMap<OrganizationEntity, GetOrganizationDto>();
 
     cfg.AllowNullCollections = true;
     cfg.AddGlobalIgnore("Item");
@@ -67,6 +68,7 @@ builder.Services.AddApiAuthentication(builder.Services.BuildServiceProvider().Ge
 
 builder.Services.AddScoped<ITeamService, TeamService>();
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IOrganizationService, OrganizationService>();
 builder.Services.AddScoped<IHackathonService, HackathonService>();
 builder.Services.AddAutoMapper(typeof(TeamProfile).Assembly, typeof(TeamInfoDto).Assembly);
 builder.Services.AddScoped<ITagRepository, TagRepository>();
