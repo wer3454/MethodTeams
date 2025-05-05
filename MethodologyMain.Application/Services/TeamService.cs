@@ -45,6 +45,7 @@ namespace MethodTeams.Services
                 Name = dto.Name,
                 Description = dto.Description,
                 CaptainId = captainId,
+                MaxMembers = dto.MaxMembers,
                 TeamCreatedAt = DateTime.UtcNow
             };
             // Добавление капитана как участника команды

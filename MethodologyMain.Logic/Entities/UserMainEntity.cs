@@ -52,7 +52,7 @@ namespace MethodologyMain.Logic.Entities
         public string Website { get; set; } = string.Empty;
 
         [Column("skills")]
-        public string SkillsJson { get; set; } = string.Empty;
+        public string SkillsJson { get; set; } = "{}";
 
         [NotMapped]
         public List<string> Skills
