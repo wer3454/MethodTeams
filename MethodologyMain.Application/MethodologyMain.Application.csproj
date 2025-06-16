@@ -14,6 +14,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\MethodologyMain.Persistence\MethodologyMain.Persistence.csproj" />
+	<ProjectReference Include="..\MethodologyMain.Infrastructure\MethodologyMain.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>

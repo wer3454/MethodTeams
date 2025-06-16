@@ -23,6 +23,7 @@ using MethodologyMain.Application.DTO;
 using MethodologyMain.Logic.Entities;
 using Serilog;
 using MethodologyMain.Logic.Models;
+using MethodologyMain.Infrastructure.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -86,9 +87,9 @@ builder.Services.AddScoped<IOrganizationRepository, OrganizationRepository>();
 builder.Services.AddScoped<IHackathonRepository, HackathonRepository>();
 builder.Services.AddScoped<ITeamValidationService, TeamValidationService>();
 builder.Services.AddSingleton<IRabbitMqPublisherBase<RabbitMqLogPublish>, LogQueueService>();
-
 builder.Services.AddHostedService<RabbitMqUserRegisterListener>()
     .AddSingleton<IRabbitMqListenerBase, RabbitMqUserRegisterListener>();
+builder.Services.AddScoped<IRedisService, RedisService>();
 
 var connection = builder.Configuration.GetConnectionString("PostgresConnection");
 builder.Services.AddDbContext<MyDbContext>(opt => opt.UseNpgsql(connection));
