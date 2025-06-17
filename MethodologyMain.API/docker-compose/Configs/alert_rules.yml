@@ -1,0 +1,31 @@
+﻿groups:
+  - name: rabbitMq-alerts
+    rules:
+      - alert: HighLevelOfUnroutedMessages
+        expr: rate(rabbitmq_global_messages_unroutable_dropped_total[5m]) > 100
+        for: 2m
+        labels:
+          severity: warning
+        annotations: 
+          summary: "High level of unroutable messages detected"
+  - name: api-response-alerts
+    rules:
+      - alert: HighTestauthRequestDuration
+        expr: sum(rate(http_request_duration_seconds_bucket{endpoint="api/main/User"}[5m])) / sum(rate(http_request_duration_seconds_count{endpoint="api/main/User"}[5m]))
+        for: 1m
+        labels:
+          severity: critical
+        annotations: 
+          summary: "High duration for testAuth request on API"
+  - name: api-request-alerts
+    rules:
+      - alert: HighLevelOfRequestsToAPI
+        expr: increase(http_requests_received_total[1m]) > 10
+        for: 1m
+        labels:
+          severity: warning
+        annotations: 
+          summary: "High api calls increase detected"
+          description: "The total of api calls has exceeded 10 calls in the last 5 minutes."
+
+  
