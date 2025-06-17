@@ -24,6 +24,8 @@ using MethodologyMain.Logic.Entities;
 using Serilog;
 using MethodologyMain.Logic.Models;
 using MethodologyMain.Infrastructure.Interfaces;
+using Prometheus;
+using StackExchange.Redis;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -39,6 +41,7 @@ builder.Services.AddControllers()
         .AddJsonOptions(options =>
         {
             options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+            options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
         });
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -90,9 +93,9 @@ builder.Services.AddSingleton<IRabbitMqPublisherBase<RabbitMqLogPublish>, LogQue
 builder.Services.AddHostedService<RabbitMqUserRegisterListener>()
     .AddSingleton<IRabbitMqListenerBase, RabbitMqUserRegisterListener>();
 builder.Services.AddScoped<IRedisService, RedisService>();
-
 var connection = builder.Configuration.GetConnectionString("PostgresConnection");
 builder.Services.AddDbContext<MyDbContext>(opt => opt.UseNpgsql(connection));
+builder.Services.AddSingleton<IConnectionMultiplexer>(ConnectionMultiplexer.Connect(builder.Configuration.GetConnectionString("RedisConnection")));
 
 var app = builder.Build();
 
@@ -103,6 +106,15 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseRouting();
+app.UseMetricServer();
+app.UseHttpMetrics(options =>
+{
+    // This will preserve only the first digit of the status code.
+    // For example: 200, 201, 203 -> 2xx
+    options.ReduceStatusCodeCardinality();
+});
+app.UseRequestMiddleware();
 
 app.UseCors("AllowFrontend");
 app.UseAuthorization();

@@ -19,9 +19,11 @@
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.21.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="8.0.11" />
+    <PackageReference Include="prometheus-net.AspNetCore" Version="8.2.1" />
     <PackageReference Include="Serilog" Version="4.2.0" />
     <PackageReference Include="Serilog.Extensions.Logging" Version="8.0.0" />
     <PackageReference Include="Serilog.Sinks.Console" Version="6.0.0" />
+    <PackageReference Include="StackExchange.Redis" Version="2.8.41" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="8.1.0" />
   </ItemGroup>
 
@@ -42,6 +44,13 @@
     <Reference Include="RabbitMqPublisher">
       <HintPath>..\MethodologyMain.Infrastructure\DLL\RabbitMqPublisher.dll</HintPath>
     </Reference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="docker-compose\grafana-data\" />
+    <Folder Include="docker-compose\Configs\" />
+    <Folder Include="docker-compose\rabbit-data\" />
+    <Folder Include="docker-compose\redis-data\" />
   </ItemGroup>
 
 </Project>
