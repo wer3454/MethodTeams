@@ -41,7 +41,7 @@ namespace MethodologyMain.Application.Services
             await userRepo.AddAsync(user, token);
             await tagRepo.AddUserTags(user.Id, dto.Tags, token);
             var key = $"user:{user.Id}";
-            await redisService.SetStringToCacheAsync(key, user);
+            await redisService.SetStringToCacheAsync(key, dto);
             return mapper.Map<GetUserDto>(user);
         }
         public async Task DeleteUserAsync(Guid userId, CancellationToken token)
@@ -87,7 +87,9 @@ namespace MethodologyMain.Application.Services
             if (redisData is not null) return redisData;
 
             var user = await userRepo.GetUserByIdAsync(userId, token);
-            return mapper.Map<GetUserDto>(user);
+            var dto = mapper.Map<GetUserDto>(user);
+            await redisService.SetStringToCacheAsync(key, dto);
+            return dto;
         }
 
         // Получение списка пользователей
@@ -98,7 +100,9 @@ namespace MethodologyMain.Application.Services
             if (redisData is not null) return redisData;
 
             var users = await userRepo.GetUsersAllAsync(token);
-            return mapper.Map<List<GetUserDto>>(users);
+            var dto = mapper.Map<List<GetUserDto>>(users);
+            await redisService.SetStringToCacheAsync(key, dto);
+            return dto;
         }
     }
 }
